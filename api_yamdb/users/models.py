@@ -1,15 +1,11 @@
-import email
-
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission, Group
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-User = get_user_model()
-user = User.objects.get(email=email)
-
 
 class User(AbstractUser):
+    groups = models.ManyToManyField(Group, related_name="customuser_groups")
+    user_permissions = models.ManyToManyField(Permission, related_name="customuser_user_permissions")
     confirmation_code = models.CharField(max_length=100, blank=True)
     USER = _('user')
     MODERATOR = _('moderator')
