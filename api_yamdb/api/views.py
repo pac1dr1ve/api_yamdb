@@ -1,23 +1,43 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
-from reviews.models import Title, Review
-from .serializers import CommentSerializer, ReviewSerializer
+from reviews.models import Category, Genre, Title, Review
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReviewSerializer
+)
+from .mixins import CategoryAndGenreMixin
+from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
+
+
+class CategoryViewSet(CategoryAndGenreMixin):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(CategoryAndGenreMixin):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     # Тут добавляется к базе данных среднее значение оценки
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
-
-    pass
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes
+    permission_classes = (
+        IsAdminOrModeratorOrReadOnly, IsAdminOrReadOnly
+    )
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -32,7 +52,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes
+    permission_classes = (
+        IsAdminOrModeratorOrReadOnly, IsAdminOrReadOnly
+    )
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
