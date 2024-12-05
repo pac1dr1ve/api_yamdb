@@ -1,65 +1,44 @@
-from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status, views
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+from django.db.models import Avg
+from rest_framework import viewsets
+from rest_framework.pagination import LimitOffsetPagination
+
+from reviews.models import Title, Review
+from .serializers import CommentSerializer, ReviewSerializer
 
 
-class UserRegistrationView(views.APIView):
-    permission_classes = (AllowAny,)
-    model = get_user_model()
+class TitleViewSet(viewsets.ModelViewSet):
+    # Тут добавляется к базе данных среднее значение оценки
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
 
-    class Serializer(serializers.ModelSerializer):
-        class Meta:
-            model = get_user_model()
-            fields = ('email', 'username', 'password')
-
-    def post(self, request):
-        serializer = self.Serializer(data=request.data)
-        if serializer.is_valid():
-            confirmation_code = self.model.objects.make_random_password()
-            email = serializer.validated_data['email']
-            send_mail(
-                'Confirmation code',
-                confirmation_code,
-                'from@example.com',
-                [email],
-                fail_silently=False,
-            )
-            self.model.objects.create_user(
-                username=serializer.validated_data['username'],
-                email=email,
-                password=serializer.validated_data['password'],
-                confirmation_code=confirmation_code
-            )
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    pass
 
 
-class RefreshToken:
-    @classmethod
-    def for_user(cls, user):
-        pass
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    pagination_class = LimitOffsetPagination
+    # permission_classes
+
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs['title_id'])
+
+    def get_queryset(self):
+        return self.get_title().reviews.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
-class ConfirmationCodeView(views.APIView):
-    permission_classes = (AllowAny,)
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    pagination_class = LimitOffsetPagination
+    # permission_classes
 
-    class Serializer(serializers.ModelSerializer):
-        class Meta:
-            model = get_user_model()
-            fields = ('username', 'confirmation_code')
+    def get_review(self):
+        return get_object_or_404(Review, pk=self.kwargs['review_id'])
 
-    def post(self, request):
-        serializer = self.Serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(
-            get_user_model(),
-            username=serializer.validated_data['username']
-        )
-        if user.confirmation_code == serializer.validated_data['confirmation_code']:
-            token = RefreshToken.for_user(user)
-            return Response({'token': str(token)}, status=status.HTTP_200_OK)
-        return Response({'confirmation_code': 'Неверный код подтверждения'}, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        return self.get_review().comments.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, review=self.get_review())
