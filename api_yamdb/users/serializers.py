@@ -3,6 +3,7 @@ from random import random
 
 from django.core.mail import send_mail
 from rest_framework import serializers
+
 from .models import User
 
 

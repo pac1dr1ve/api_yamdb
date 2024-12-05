@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
+    email = models.EmailField(_('email address'), unique=True)
     groups = models.ManyToManyField(Group, related_name="customuser_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_user_permissions")
     confirmation_code = models.CharField(max_length=100, blank=True)
