@@ -1,6 +1,6 @@
 from rest_framework import mixins, viewsets, filters
 
-from .permissions import AdminOrReadOnly
+from .permissions import IsAdminOrReadOnly
 
 
 class CategoryAndGenreMixin(mixins.CreateModelMixin,
@@ -8,4 +8,4 @@ class CategoryAndGenreMixin(mixins.CreateModelMixin,
                             viewsets.GenericViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
