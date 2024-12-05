@@ -1,12 +1,28 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import Comment, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = '__all__'
 
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True, default=None)
+    category = CategorySerializer()
+    genre = GenreSerializer()
 
-    pass
+    class Meta:
+        model = Title
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -40,7 +56,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                     author=self.context['request'].user
                 )
                 raise serializers.ValidationError(
-                    "Пользователь уже оставил отзыв на это произведение."
+                    'Пользователь уже оставил отзыв на это произведение.'
                 )
             except Review.DoesNotExist:
                 pass
