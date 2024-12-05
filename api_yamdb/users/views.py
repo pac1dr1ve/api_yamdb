@@ -12,13 +12,13 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()  # Use save method instead of create
+        user = serializer.save()
         refresh = RefreshToken.for_user(user)
 
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+        }, status=status.HTTP_200_OK)
 
     def get_token(self, request):
         username = request.data.get('username')
