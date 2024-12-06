@@ -3,6 +3,7 @@ import csv
 from django.core.management.base import BaseCommand
 
 from reviews.models import Category, Comment, Genre, GenreTitle, Title, Review
+from users.models import User
 
 
 class Command(BaseCommand):
@@ -58,4 +59,12 @@ class Command(BaseCommand):
                         category=row['category']
                     )
                 if 'users.csv' in csv_file:
-                    pass
+                    User.objects.create(
+                        id=row['id'],
+                        username=row['username'],
+                        email=row['email'],
+                        role=row['role'],
+                        bio=row['bio'],
+                        first_name=row['first_name'],
+                        last_name=row['last_name']
+                    )
