@@ -1,6 +1,7 @@
 import re
 
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 from rest_framework.validators import UniqueValidator
 from django.core.exceptions import ValidationError
 
@@ -30,6 +31,7 @@ class UserRegistrationSerializer(serializers.Serializer):
         return value
 
     def validate_email(self, value):
+
         if len(value) < 6 or len(value) > 256:
             raise ValidationError(
                 "Количество символов названия почты должно быть от 6 до 256"
@@ -53,7 +55,7 @@ class UserTokenSerializer(serializers.Serializer):
                 )
             return {'user': user}
         except User.DoesNotExist:
-            raise ValidationError({'username': 'Пользователь не найден'})
+            raise NotFound({'username': 'Пользователь не найден'})
 
 
 class UserSerializer(serializers.ModelSerializer):
