@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
     groups = models.ManyToManyField(Group, related_name="customuser_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_user_permissions")
     confirmation_code = models.CharField(max_length=100, blank=True)
@@ -20,13 +20,15 @@ class User(AbstractUser):
     )
 
     username = models.CharField(
-        max_length=254,
+        max_length=150,
         verbose_name='Никнейм',
         unique=True,
+        blank=False,
+        null=False,
         validators=[
             RegexValidator(
                 regex=r'^[\w.@+-]+$',
-                message = 'Никнейм содержит недопустимы символы!'
+                message='Никнейм содержит недопустимы символы!'
             )
         ],
     )

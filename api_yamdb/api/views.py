@@ -9,7 +9,7 @@ from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
-    ReviewSerializer
+    ReviewSerializer, TitleSerializer
 )
 from .mixins import CategoryAndGenreMixin
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
@@ -30,6 +30,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAdminOrReadOnly,)
+    serializer_class = TitleSerializer # Кажется нужно добавить эту часть
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
