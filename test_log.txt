@@ -1,0 +1,440 @@
+WARNING  django.request:log.py:224 Bad Request: /api/v1/auth/signup/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/auth/signup/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/auth/signup/
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/auth/token/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/auth/token/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/auth/token/
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/auth/signup/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 205, in save
+    self.instance = self.create(validated_data)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\serializers.py", line 170, in create
+    raise NotImplementedError('`create()` must be implemented.')
+NotImplementedError: `create()` must be implemented.
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Unauthorized: /api/v1/users/
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/TestAdmin/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 54, in retrieve
+    instance = self.get_object()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\generics.py", line 83, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\generics.py", line 63, in get_queryset
+    assert self.queryset is not None, (
+AssertionError: 'UserViewSet' should either include a `queryset` attribute, or override the `get_queryset()` method.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Forbidden: /api/v1/users/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/TestModerator/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 54, in retrieve
+    instance = self.get_object()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\generics.py", line 83, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\generics.py", line 63, in get_queryset
+    assert self.queryset is not None, (
+AssertionError: 'UserViewSet' should either include a `queryset` attribute, or override the `get_queryset()` method.
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/TestAdmin/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\mixins.py", line 54, in retrieve
+    instance = self.get_object()
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\generics.py", line 83, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\generics.py", line 63, in get_queryset
+    assert self.queryset is not None, (
+AssertionError: 'UserViewSet' should either include a `queryset` attribute, or override the `get_queryset()` method.
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+WARNING  django.request:log.py:224 Method Not Allowed: /api/v1/users/TestUser/
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+ERROR    django.request:log.py:224 Internal Server Error: /api/v1/users/me/
+Traceback (most recent call last):
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "z:\PythonProjects\GroupProject\api_yamdb\.venv\lib\site-packages\rest_framework\viewsets.py", line 117, in view
+    handler = getattr(self, action)
+AttributeError: 'UserMeViewSet' object has no attribute 'partial_update'
+WARNING  django.request:log.py:224 Bad Request: /api/v1/categories/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/categories/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/categories/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/categories/
+WARNING  django.request:log.py:224 Not Found: /api/v1/categories/films/
+WARNING  django.request:log.py:224 Unauthorized: /api/v1/categories/
+WARNING  django.request:log.py:224 Not Found: /api/v1/categories/films/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/genres/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/genres/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/genres/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/genres/
+WARNING  django.request:log.py:224 Not Found: /api/v1/genres/horror/
+WARNING  django.request:log.py:224 Unauthorized: /api/v1/genres/
+WARNING  django.request:log.py:224 Not Found: /api/v1/genres/horror/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/
+WARNING  django.request:log.py:224 Bad Request: /api/v1/titles/

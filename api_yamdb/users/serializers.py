@@ -1,33 +1,65 @@
-import random
-import string
+import re
 
-from django.core.mail import send_mail
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from django.core.exceptions import ValidationError
 
 from .models import User
 
 
+class UserRegistrationSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        required=True
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        required=True
+    )
+
+    def validate_username(self, value):
+
+        if not re.fullmatch(r'^[a-zA-Z0-9_]+$', value):
+            raise ValidationError("Никнейм содержит недопустимы символы!")
+
+        if len(value) < 4 or len(value) > 150:
+            raise ValidationError(
+                "Количество символов в никнейме должно быть от 4 до 150"
+            )
+
+        return value
+
+    def validate_email(self, value):
+        if len(value) < 6 or len(value) > 256:
+            raise ValidationError(
+                "Количество символов названия почты должно быть от 6 до 256"
+            )
+
+        return value
+
+
+class UserTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
+    def validate(self, data):
+        username = data['username']
+        confirmation_code = data['confirmation_code']
+        try:
+            user = User.objects.get(username=username)
+            if user.confirmation_code != confirmation_code:
+                raise ValidationError(
+                    {'confirmation_code': 'Неверный код подтверждения'}
+                )
+            return {'user': user}
+        except User.DoesNotExist:
+            raise ValidationError({'username': 'Пользователь не найден'})
+
+
 class UserSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
     class Meta:
         model = User
-        fields = '__all__'
-
-    def create(self, validated_data):
-        confirmation_code = self.generate_confirmation_code()
-        user = User.objects.create(**validated_data, confirmation_code=confirmation_code)
-        self.send_confirmation_email(user, confirmation_code)
-        return user
-
-    @staticmethod
-    def generate_confirmation_code():
-        return "".join(random.choices(string.ascii_uppercase + string.digits, k=50))
-
-    @staticmethod
-    def send_confirmation_email(user, confirmation_code=None):
-        send_mail(
-            'Код подтверждения',
-            f'Ваш код подтверждения: {confirmation_code}',
-            'yamdb@example.com',
-            [f"{user.email}"],
-            fail_silently=False,
-        )
+        fields = ('first_name', 'last_name', 'username',
+                  'bio', 'email', 'role')
