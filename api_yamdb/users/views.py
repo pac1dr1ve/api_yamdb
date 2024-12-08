@@ -74,23 +74,29 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         user = self.get_object()
-        serializer = ChangePasswordSerializer(data=request.data)
 
-        if serializer.is_valid():
-            if not user.check_password(serializer.data.get("old_password")):
-                return Response({"old_password": ["Неправильный пароль."]},
-                                status=status.HTTP_400_BAD_REQUEST)
-            user.set_password(serializer.data.get("new_password"))
-            user.save()
-            response = {
-                'status': 'success',
-                'code': status.HTTP_200_OK,
-                'message': 'Пароль обновлен успешно',
-                'data': []
-            }
-            return Response(response)
+        # Позволить суперпользователю обновлять данные любого пользователя
+        if request.user.is_superuser or request.user == user:
+            serializer = ChangePasswordSerializer(data=request.data)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                if not user.check_password(serializer.data.get("old_password")):
+                    return Response({"old_password": ["Неправильный пароль."]},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                user.set_password(serializer.data.get("new_password"))
+                user.save()
+                response = {
+                    'status': 'success',
+                    'code': status.HTTP_200_OK,
+                    'message': 'Пароль обновлен успешно',
+                    'data': []
+                }
+                return Response(response)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @staticmethod
     def generate_confirmation_code():
