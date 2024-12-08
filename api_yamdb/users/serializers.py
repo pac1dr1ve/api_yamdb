@@ -17,6 +17,8 @@ class UserRegistrationSerializer(serializers.Serializer):
         validators=[UniqueValidator(queryset=User.objects.all())],
         required=True,
     )
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
 
     def validate_username(self, value):
         if value.lower() == 'me':
@@ -36,9 +38,19 @@ class UserRegistrationSerializer(serializers.Serializer):
             )
         return value
 
+    def validate_first_name(self, value):
+        if len(value) > 150:
+            raise ValidationError("Имя не должно превышать 150 символов")
+        return value
+
+    def validate_last_name(self, value):
+        if len(value) > 150:
+            raise ValidationError("Фамилия не должна превышать 150 символов")
+        return value
+
     def create(self, validated_data):
         role = validated_data.pop('role', 'user')
-        user = User.objects.get_or_create(**validated_data, role=role)
+        user = User.objects.create(**validated_data, role=role)
         return user
 
 

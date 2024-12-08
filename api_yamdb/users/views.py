@@ -1,8 +1,8 @@
 import random
 import string
 from django.core.mail import send_mail
-from rest_framework import status, views, viewsets, exceptions
-from rest_framework.exceptions import ValidationError
+from rest_framework import status, views, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -29,15 +29,10 @@ class UserMeView(views.APIView):
             try:
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            except ValidationError as e:
-                return Response({"error": e.detail},
-                                status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({"error": str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -52,71 +47,67 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         username = serializer.validated_data['username']
-        confirmation_code = self.generate_confirmation_code()
 
-        user, created = User.objects.get_or_create(
-            username=username,
-            email=email
-        )
-        if created:
-            # Новый пользователь
-            user.confirmation_code = confirmation_code
-            user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            # Пользователь уже существует, обновляем confirmation_code
-            user.confirmation_code = confirmation_code
-            user.save()
-            return Response(
-                {'detail': 'Код подтверждения отправлен повторно'},
-                status=status.HTTP_200_OK
-            )
+        # Проверка на существование пользователя с таким же email или username
+        if User.objects.filter(email=email).exists() or User.objects.filter(
+                username=username).exists():
+            return Response({'detail': 'Пользователь с таким email '
+                                       'или username уже существует'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        confirmation_code = ''.join(random.choices(string.ascii_uppercase
+                                                   + string.digits,
+                                                   k=50))
+
+        user = User.objects.create_user(username=username, email=email)
+
+        user.confirmation_code = confirmation_code
+        user.save()
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
 
     def update(self, request, *args, **kwargs):
         user = self.get_object()
 
-        # Позволить суперпользователю обновлять данные любого пользователя
         if request.user.is_superuser or request.user == user:
             serializer = ChangePasswordSerializer(data=request.data)
 
             if serializer.is_valid():
-                if not user.check_password(serializer.data.get("old_password")):
+                if not user.check_password(serializer.validated_data["old_password"]):
                     return Response({"old_password": ["Неправильный пароль."]},
                                     status=status.HTTP_400_BAD_REQUEST)
-                user.set_password(serializer.data.get("new_password"))
+                user.set_password(serializer.validated_data["new_password"])
                 user.save()
-                response = {
-                    'status': 'success',
-                    'code': status.HTTP_200_OK,
-                    'message': 'Пароль обновлен успешно',
-                    'data': []
-                }
-                return Response(response)
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-    @staticmethod
-    def generate_confirmation_code():
-        return ''.join(random.choices(string.ascii_uppercase + string.digits,
-                                      k=50))
+                return Response(
+                    {'status': 'success', 'code': status.HTTP_200_OK,
+                     'message': 'Пароль обновлен успешно', 'data': []})
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
     @staticmethod
     def send_confirmation_email(user, confirmation_code=None):
-        send_mail(
-            'Код подтверждения',
-            f'Ваш код подтверждения: {confirmation_code}',
-            'yamdb@example.com',
-            [user.email],
-            fail_silently=False,
-        )
+        send_mail('Код подтверждения',
+                  f'Ваш код подтверждения: {confirmation_code}',
+                  'yamdb@example.com',
+                  [user.email],
+                  fail_silently=False)
+
+    @action(detail=False, methods=['get'])
+    def current_user(self, request):
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        return Response("Unauthorized",
+                        status=status.HTTP_401_UNAUTHORIZED)
 
     def destroy(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            return super().destroy(request, *args, **kwargs)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+        instance = self.get_object()
+        if request.user.is_admin or request.user.is_superuser:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -131,13 +122,9 @@ class ObtainAuthToken(views.APIView):
 
     def post(self, request):
         serializer = UserTokenSerializer(data=request.data)
-        validated_data = serializer.is_valid(raise_exception=True)
-        user = validated_data['user']
-        if not user:
-            raise exceptions.NotFound('Пользователь не найден')
-        user.save()
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_200_OK)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            return Response({'refresh': str(refresh),
+                             'access': str(refresh.access_token)},
+                            status=status.HTTP_200_OK)

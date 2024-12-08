@@ -12,4 +12,5 @@ urlpatterns = [
     path('users/<int:pk>/', UserViewSet.as_view({'get': 'retrieve',
                                                  'delete': 'destroy'}), name='user'),
     path('users/set_password/', UserViewSet.as_view({'post': 'update'}), name='user_update'),
+    path('users/current_user/', UserMeView.as_view(), name='current_user'),
 ]
