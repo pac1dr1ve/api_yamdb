@@ -13,11 +13,11 @@ class User(AbstractUser):
     MODERATOR = _('moderator')
     ADMIN = _('admin')
 
-    ROLES = (
+    ROLES = [
         (USER, _('user')),
         (MODERATOR, _('moderator')),
         (ADMIN, _('admin'))
-    )
+    ]
 
     username = models.CharField(
         max_length=150,
