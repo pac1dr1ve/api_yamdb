@@ -1,6 +1,5 @@
 import re
 
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
@@ -15,7 +14,7 @@ class UserRegistrationSerializer(serializers.Serializer):
     )
     username = serializers.CharField(
         validators=[UniqueValidator(queryset=User.objects.all())],
-        required=True,
+        max_length=150, required=True,
     )
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
@@ -48,9 +47,9 @@ class UserRegistrationSerializer(serializers.Serializer):
             raise ValidationError("Фамилия не должна превышать 150 символов")
         return value
 
-    def create(self, validated_data):
-        role = validated_data.pop('role', 'user')
-        user = User.objects.create(**validated_data, role=role)
+    def create(self, **kwargs):
+        role = self.validated_data.pop('role', 'user')
+        user = User.objects.create_user(**self.validated_data, role=role)
         return user
 
 
@@ -69,7 +68,7 @@ class UserTokenSerializer(serializers.Serializer):
                 )
             return {'user': user}
         except User.DoesNotExist:
-            raise ValidationError({'username': 'Пользователь не найден'})
+            raise serializers.ValidationError({'username': 'Пользователь не найден'})
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -85,6 +84,6 @@ class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
-    def validate_new_password(self, value):
-        validate_password(value)
-        return value
+    # def validate_new_password(self, value):
+    #     validate_password(value)
+    #     return value

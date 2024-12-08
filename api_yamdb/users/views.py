@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAdminOrSuperuserPermission
 from .serializers import (UserSerializer,
                           UserRegistrationSerializer,
                           UserTokenSerializer, ChangePasswordSerializer)
@@ -39,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = (IsAuthenticated, IsAdminOrSuperuserPermission)
     pagination_class = PageNumberPagination
 
     def create(self, request, *args, **kwargs):
@@ -65,25 +65,20 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
-
     def update(self, request, *args, **kwargs):
         user = self.get_object()
+        serializer = ChangePasswordSerializer(data=request.data)
 
-        if request.user.is_superuser or request.user == user:
-            serializer = ChangePasswordSerializer(data=request.data)
-
-            if serializer.is_valid():
-                if not user.check_password(serializer.validated_data["old_password"]):
-                    return Response({"old_password": ["Неправильный пароль."]},
-                                    status=status.HTTP_400_BAD_REQUEST)
-                user.set_password(serializer.validated_data["new_password"])
-                user.save()
-                return Response(
-                    {'status': 'success', 'code': status.HTTP_200_OK,
-                     'message': 'Пароль обновлен успешно', 'data': []})
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+        if serializer.is_valid():
+            if not user.check_password(serializer.validated_data["old_password"]):
+                return Response({"old_password": ["Неправильный пароль."]},
+                                status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(serializer.validated_data["new_password"])
+            user.save()
+            return Response(
+                {'status': 'success', 'code': status.HTTP_200_OK, 'message':
+                    'Пароль обновлен успешно', 'data': []})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def send_confirmation_email(user, confirmation_code=None):
@@ -103,6 +98,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+
         if request.user.is_admin or request.user.is_superuser:
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
