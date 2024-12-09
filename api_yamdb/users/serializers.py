@@ -44,15 +44,15 @@ class UserRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError("Недопустимое имя пользователя")
         if not re.fullmatch(r'^[\w.@+-]+\Z', value):
             raise serializers.ValidationError("Никнейм содержит недопустимы символы!")
-        if len(value) > 150:
-            raise serializers.ValidationError("Максимальная длина никнейма"
-                                              " - 150 символов")
+        if 4 > len(value) > 150:
+            raise serializers.ValidationError("Количество символов в "
+                                              "никнейме должно быть от 4 до 150")
         return value
 
     def validate_email(self, value):
-        if len(value) > 256:
-            raise serializers.ValidationError("Максимальная длина email"
-                                              " - 256 символов")
+        if 6 > len(value) > 256:
+            raise serializers.ValidationError("Количество символов названия "
+                                              "почты должно быть от 6 до 256")
         return value
 
     def validate_first_name(self, value):
