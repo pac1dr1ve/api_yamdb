@@ -7,52 +7,6 @@ from rest_framework.validators import UniqueValidator
 from reviews.models import User
 
 
-class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())],
-        required=True,
-    )
-    username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())],
-        max_length=150, required=True,
-    )
-    first_name = serializers.CharField(max_length=150, required=False)
-    last_name = serializers.CharField(max_length=150, required=False)
-
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError("Недопустимое имя пользователя")
-        if not re.fullmatch(r'^[a-zA-Z0-9_]+$', value):
-            raise ValidationError("Никнейм содержит недопустимы символы!")
-        if len(value) < 4 or len(value) > 150:
-            raise ValidationError(
-                "Количество символов в никнейме должно быть от 4 до 150"
-            )
-        return value
-
-    def validate_email(self, value):
-        if len(value) < 6 or len(value) > 256:
-            raise ValidationError(
-                "Количество символов названия почты должно быть от 6 до 256"
-            )
-        return value
-
-    def validate_first_name(self, value):
-        if len(value) > 150:
-            raise ValidationError("Имя не должно превышать 150 символов")
-        return value
-
-    def validate_last_name(self, value):
-        if len(value) > 150:
-            raise ValidationError("Фамилия не должна превышать 150 символов")
-        return value
-
-    def create(self, **kwargs):
-        role = self.validated_data.pop('role', 'user')
-        user = User.objects.create_user(**self.validated_data, role=role)
-        return user
-
-
 class UserTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
@@ -60,6 +14,8 @@ class UserTokenSerializer(serializers.Serializer):
     def validate(self, data):
         username = data['username']
         confirmation_code = data['confirmation_code']
+        if len(confirmation_code) != 50:
+            raise ValidationError('Неверный формат кода подтверждения')
         try:
             user = User.objects.get(username=username)
             if user.confirmation_code != confirmation_code:
@@ -69,6 +25,68 @@ class UserTokenSerializer(serializers.Serializer):
             return {'user': user}
         except User.DoesNotExist:
             raise serializers.ValidationError({'username': 'Пользователь не найден'})
+
+
+class UserRegistrationSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        max_length=254, required=True,
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        max_length=150, required=True,
+    )
+    first_name = serializers.CharField(max_length=150, required=True)
+    last_name = serializers.CharField(max_length=150, required=False)
+
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError("Недопустимое имя пользователя")
+        if not re.fullmatch(r'^[\w.@+-]+\Z', value):
+            raise serializers.ValidationError("Никнейм содержит недопустимы символы!")
+        if len(value) > 150:
+            raise serializers.ValidationError("Максимальная длина никнейма"
+                                              " - 150 символов")
+        return value
+
+    def validate_email(self, value):
+        if len(value) > 256:
+            raise serializers.ValidationError("Максимальная длина email"
+                                              " - 256 символов")
+        return value
+
+    def validate_first_name(self, value):
+        if len(value) > 150:
+            raise serializers.ValidationError("Имя не должно превышать 150 символов")
+        return value
+
+    def validate_last_name(self, value):
+        if len(value) > 150:
+            raise serializers.ValidationError("Фамилия не должна превышать 150 символов")
+        return value
+
+    # def create(self, validated_data):
+    #     if not validated_data:
+    #         raise ValidationError('Данные не прошли валидацию')
+    #
+    #     role = validated_data.pop('role', 'user')
+    #     email = validated_data.get('email')
+    #     username = validated_data.get('username')
+    #     if (User.objects.filter(email=email).exists() or
+    #             User.objects.filter(username=username).exists()):
+    #         raise ValidationError('Пользователь с таким email '
+    #                               'или username уже существует.')
+    #
+    #     user = User.objects.create_user(**validated_data, role=role)
+    #     return user
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        username = validated_data.get('username')
+        if User.objects.filter(email=email).exists() or User.objects.filter(username=username).exists():
+            raise ValidationError('Пользователь с таким email или '
+                                  'username уже существует.')
+        user = User.objects.create_user(**validated_data)
+        return user
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -83,7 +101,3 @@ class UserSerializer(serializers.ModelSerializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
-
-    # def validate_new_password(self, value):
-    #     validate_password(value)
-    #     return value

@@ -32,7 +32,7 @@ class User(AbstractUser):
             )
         ],
     )
-    first_name = models.CharField(max_length=150, verbose_name='Имя', blank=True)
+    first_name = models.CharField(max_length=150, verbose_name='Имя', blank=False)
     last_name = models.CharField(max_length=150, verbose_name='Фамилия', blank=True)
     bio = models.TextField(verbose_name='Биография', blank=True)
     role = models.CharField(
