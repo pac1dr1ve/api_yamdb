@@ -15,7 +15,7 @@ class UserTokenSerializer(serializers.Serializer):
         username = data['username']
         confirmation_code = data['confirmation_code']
         if len(confirmation_code) != 50:
-            raise ValidationError('Неверный формат кода подтверждения')
+            raise serializers.ValidationError('Неверный формат кода подтверждения')
         try:
             user = User.objects.get(username=username)
             if user.confirmation_code != confirmation_code:
@@ -65,26 +65,12 @@ class UserRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError("Фамилия не должна превышать 150 символов")
         return value
 
-    # def create(self, validated_data):
-    #     if not validated_data:
-    #         raise ValidationError('Данные не прошли валидацию')
-    #
-    #     role = validated_data.pop('role', 'user')
-    #     email = validated_data.get('email')
-    #     username = validated_data.get('username')
-    #     if (User.objects.filter(email=email).exists() or
-    #             User.objects.filter(username=username).exists()):
-    #         raise ValidationError('Пользователь с таким email '
-    #                               'или username уже существует.')
-    #
-    #     user = User.objects.create_user(**validated_data, role=role)
-    #     return user
     def create(self, validated_data):
         email = validated_data.get('email')
         username = validated_data.get('username')
         if User.objects.filter(email=email).exists() or User.objects.filter(username=username).exists():
-            raise ValidationError('Пользователь с таким email или '
-                                  'username уже существует.')
+            raise serializers.ValidationError('Пользователь с таким email или '
+                                              'username уже существует.')
         user = User.objects.create_user(**validated_data)
         return user
 

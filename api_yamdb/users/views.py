@@ -105,7 +105,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_401_UNAUTHORIZED)
 
     @api_view(['DELETE'])
-    def user_delete(self, request, username):
+    def user_delete(request, username):
         user = get_object_or_404(User, username=username)
         if request.user.is_admin or request.user.is_superuser:
             user.delete()
