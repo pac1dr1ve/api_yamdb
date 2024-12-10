@@ -8,7 +8,6 @@ urlpatterns = [
     path("users/me/", UserMeView.as_view(), name="users_me"),
     path("users/<str:username>/", UserViewSet.as_view({"get": "retrieve",
                                                        "delete": "destroy"}), name="user_detail"),
-
     path("users/<int:pk>/", UserViewSet.as_view({"get": "retrieve",
                                                  "delete": "destroy"}), name="user"),
     path("users/set_password/", UserViewSet.as_view({"post": "update"}), name="user_update"),

@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
-from users.permissions import IsAdminOrSuperuserPermission
 from users.serializers import (
     UserRegistrationSerializer,
     UserSerializer,
@@ -151,14 +150,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class ObtainAuthToken(views.APIView):
-    permission_classes = (IsAdminOrSuperuserPermission,)
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = UserTokenSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid():
             user = serializer.validated_data["user"]
             refresh = RefreshToken.for_user(user)
             return Response(
                 {"token": str(refresh.access_token)}, status=status.HTTP_200_OK,
             )
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

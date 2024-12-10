@@ -8,7 +8,7 @@ from reviews.models import User
 
 class UserTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(max_length=50, required=True)
 
     def validate(self, data):
         username = data["username"]
