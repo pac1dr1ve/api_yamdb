@@ -67,16 +67,17 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
+        existing_user_email = User.objects.filter(email=email).exists()
         if existing_user_email:
             return Response(
                 {"detail": "Пользователь с таким email существует."},
-                status=status.HTTP_409_CONFLICT,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         if existing_user_username:
             return Response(
                 {"detail": "Пользователь с таким username существует."},
-                status=status.HTTP_409_CONFLICT,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Создание нового пользователя
