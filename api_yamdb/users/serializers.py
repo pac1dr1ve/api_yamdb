@@ -2,7 +2,6 @@ import re
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueValidator
 
 from reviews.models import User
 
@@ -12,47 +11,47 @@ class UserTokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data):
-        username = data['username']
-        confirmation_code = data['confirmation_code']
+        username = data["username"]
+        confirmation_code = data["confirmation_code"]
         if len(confirmation_code) != 50:
-            raise serializers.ValidationError('Неверный формат кода подтверждения')
+            raise serializers.ValidationError("Неверный формат кода подтверждения")
         try:
             user = User.objects.get(username=username)
             if user.confirmation_code != confirmation_code:
                 raise ValidationError(
-                    {'confirmation_code': 'Неверный код подтверждения'}
+                    {"confirmation_code": "Неверный код подтверждения"},
                 )
-            return {'user': user}
+            return {"user": user}
         except User.DoesNotExist:
-            raise serializers.ValidationError({'username': 'Пользователь не найден'})
+            raise serializers.ValidationError({"username": "Пользователь не найден"})
 
 
 class UserRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())],
-        max_length=254, required=True,
+        max_length=254,
+        required=True,
     )
     username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())],
-        max_length=150, required=True,
+        max_length=150,
+        required=True,
     )
-    first_name = serializers.CharField(max_length=150, required=True)
-    last_name = serializers.CharField(max_length=150, required=False)
 
     def validate_username(self, value):
-        if value.lower() == 'me':
+        if value.lower() == "me":
             raise serializers.ValidationError("Недопустимое имя пользователя")
-        if not re.fullmatch(r'^[\w.@+-]+\Z', value):
+        if not re.fullmatch(r"^[\w.@+-]+\Z", value):
             raise serializers.ValidationError("Никнейм содержит недопустимы символы!")
         if 4 > len(value) > 150:
-            raise serializers.ValidationError("Количество символов в "
-                                              "никнейме должно быть от 4 до 150")
+            raise serializers.ValidationError(
+                "Количество символов в никнейме должно быть от 4 до 150",
+            )
         return value
 
     def validate_email(self, value):
         if 6 > len(value) > 256:
-            raise serializers.ValidationError("Количество символов названия "
-                                              "почты должно быть от 6 до 256")
+            raise serializers.ValidationError(
+                "Количество символов названия почты должно быть от 6 до 256",
+            )
         return value
 
     def validate_first_name(self, value):
@@ -62,17 +61,10 @@ class UserRegistrationSerializer(serializers.Serializer):
 
     def validate_last_name(self, value):
         if len(value) > 150:
-            raise serializers.ValidationError("Фамилия не должна превышать 150 символов")
+            raise serializers.ValidationError(
+                "Фамилия не должна превышать 150 символов",
+            )
         return value
-
-    def create(self, validated_data):
-        email = validated_data.get('email')
-        username = validated_data.get('username')
-        if User.objects.filter(email=email).exists() or User.objects.filter(username=username).exists():
-            raise serializers.ValidationError('Пользователь с таким email или '
-                                              'username уже существует.')
-        user = User.objects.create_user(**validated_data)
-        return user
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -80,8 +72,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username',
-                  'bio', 'email', 'role')
+        fields = ("first_name", "last_name", "username", "bio", "email", "role")
 
 
 class ChangePasswordSerializer(serializers.Serializer):
