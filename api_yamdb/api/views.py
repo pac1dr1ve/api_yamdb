@@ -9,7 +9,8 @@ from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
-    ReviewSerializer, TitleSerializer
+    TitleSerializer,
+    ReviewSerializer
 )
 from .mixins import CategoryAndGenreMixin
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
@@ -27,6 +28,7 @@ class GenreViewSet(CategoryAndGenreMixin):
 
 class TitleViewSet(viewsets.ModelViewSet):
     # Тут добавляется к базе данных среднее значение оценки
+    serializer_class = TitleSerializer
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAdminOrReadOnly,)
