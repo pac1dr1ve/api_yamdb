@@ -3,6 +3,17 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+
+
+ROLES = [
+    ('admin', ADMIN),
+    ('moderator', MODERATOR),
+    ('user', USER)
+]
+
 
 class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True, blank=False, null=False)
@@ -43,12 +54,12 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser
+        return self.role == ADMIN or self.is_superuser
 
     @property
     def is_moderator(self):
-        return self.role == self.MODERATOR
+        return self.role == MODERATOR
 
     @property
     def is_user(self):
-        return self.role == self.USER
+        return self.role == USER
