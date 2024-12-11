@@ -57,10 +57,14 @@ class UserViewSet(viewsets.ModelViewSet):
         existing_user_username = User.objects.filter(username=username).first()
 
         if existing_user_email and existing_user_username:
-            # Отправляем код подтверждения повторно
-            self.send_confirmation_email(
-                existing_user_email, existing_user_email.confirmation_code,
+            # Обновляем код подтверждения и отправляем его повторно
+            confirmation_code = "".join(
+                random.choices(string.ascii_uppercase + string.digits, k=50),
             )
+            existing_user_email.confirmation_code = confirmation_code
+            existing_user_email.save()
+
+            self.send_confirmation_email(existing_user_email, confirmation_code)
             return Response(
                 {"detail": "Код подтверждения отправлен повторно."},
                 status=status.HTTP_200_OK,
