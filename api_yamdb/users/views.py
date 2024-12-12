@@ -2,11 +2,13 @@ import random
 import string
 from django.core.mail import send_mail
 from rest_framework import status, views, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
@@ -38,6 +40,29 @@ class UserMeView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserEndpointTestCase(APITestCase):
+    def test_unauthorized_access(self):
+        # Незарегистрированным пользователям не доступен эндпоинт api/v1/users/
+        url = reverse('api:v1:users')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Пользователям без роли admin или superuser не доступен эндпоинт api/v1/users/{username}/
+        user = UserViewSet
+
+        url_with_username = reverse()
+        self.client.force_authenticate(user=user)
+        response_with_username = self.client.get(url_with_username)
+        self.assertEqual(response_with_username.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_moderator_access(self):
+        moderator = User.objects.create_user(role='moderator')
+        url_moderator = reverse('api:v1:users')
+        self.client.force_authenticate(user=moderator)
+        response_moderator = self.client.get(url_moderator)
+        self.assertEqual(response_moderator.status_code, status.HTTP_403_FORBIDDEN)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
@@ -56,7 +81,7 @@ class UserViewSet(viewsets.ModelViewSet):
         existing_user_email = User.objects.filter(email=email).first()
         existing_user_username = User.objects.filter(username=username).first()
 
-        if existing_user_email and existing_user_username:
+        if existing_user_email:
             # Обновляем код подтверждения и отправляем его повторно
             confirmation_code = "".join(
                 random.choices(string.ascii_uppercase + string.digits, k=50),
@@ -70,21 +95,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
-        existing_user_email = User.objects.filter(email=email).exists()
-        if existing_user_email:
-            return Response(
-                {"detail": "Пользователь с таким email существует."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         if existing_user_username:
             return Response(
-                {"detail": "Пользователь с таким username существует."},
+                {"detail": "Пользователь с таким username уже существует."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Создание нового пользователя
-        user = User.objects.create_user(username=username, email=email, role=role)
+        user = User.objects.create_user(
+            username=username, email=email, role=role,
+        )
         user.set_unusable_password()
         confirmation_code = "".join(
             random.choices(string.ascii_uppercase + string.digits, k=50),
@@ -94,7 +114,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # Отправляем код подтверждения на email
         self.send_confirmation_email(user, confirmation_code)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "email": user.email,
+                "username": user.username,
+                # "role": user.role,
+                # "first_name": user.first_name,
+                # "last_name": user.last_name,
+                # "bio": user.bio
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def update(self, request, *args, **kwargs):
         user = get_object_or_404(User, username=self.kwargs["username"])
@@ -136,8 +166,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 
-    @api_view(["DELETE"])
-    def user_delete(request, username):
+    @action(detail=False)
+    def user_delete(self, request, username):
         user = get_object_or_404(User, username=username)
         if request.user.is_admin or request.user.is_superuser:
             user.delete()
@@ -155,6 +185,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class ObtainAuthToken(views.APIView):
     permission_classes = (AllowAny,)
+
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = UserTokenSerializer(data=request.data)

@@ -2,6 +2,7 @@ import re
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from typing import Dict, Any
 
 from reviews.models import User
 
@@ -10,7 +11,7 @@ class UserTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(max_length=50, required=True)
 
-    def validate(self, data):
+    def validate(self, data: Dict[str, str]) -> Dict[str, Any]:
         username = data["username"]
         confirmation_code = data["confirmation_code"]
         if len(confirmation_code) != 50:
@@ -36,7 +37,17 @@ class UserRegistrationSerializer(serializers.Serializer):
         required=True,
     )
 
-    def validate_username(self, value):
+    def validate_first_name(self, value):
+        if len(value) < 4 or len(value) > 150:
+            raise serializers.ValidationError("Имя должно быть от 4 до 150 символов")
+        return value
+
+    def validate_last_name(self, value):
+        if len(value) < 4 or len(value) > 150:
+            raise serializers.ValidationError("Фамилия должна быть от 4 до 150 символов")
+        return value
+
+    def validate_username(self, value: str) -> str:
         if value.lower() == "me":
             raise serializers.ValidationError("Недопустимое имя пользователя")
         if not re.fullmatch(r"^[\w.@+-]+\Z", value):
@@ -45,6 +56,9 @@ class UserRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Количество символов в никнейме должно быть от 4 до 150",
             )
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Пользователь с таким "
+                                              "username уже существует")
         return value
 
     def validate_email(self, value):
@@ -52,18 +66,9 @@ class UserRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Количество символов названия почты должно быть от 6 до 256",
             )
-        return value
-
-    def validate_first_name(self, value):
-        if len(value) > 150:
-            raise serializers.ValidationError("Имя не должно превышать 150 символов")
-        return value
-
-    def validate_last_name(self, value):
-        if len(value) > 150:
-            raise serializers.ValidationError(
-                "Фамилия не должна превышать 150 символов",
-            )
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Пользователь с таким "
+                                              "email уже существует")
         return value
 
 
