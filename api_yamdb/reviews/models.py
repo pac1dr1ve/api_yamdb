@@ -12,6 +12,7 @@ class Category(models.Model):
     )
     slug = models.SlugField(
         max_length=50,
+        unique=True,
         verbose_name='Слаг'
     )
 
@@ -23,10 +24,11 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(
         max_length=256,
-        verbose_name='Жанр'
+        verbose_name='Имя'
     )
     slug = models.SlugField(
         max_length=50,
+        unique=True,
         verbose_name='Слаг'
     )
 
