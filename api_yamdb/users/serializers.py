@@ -17,12 +17,14 @@ class UserTokenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.EmailField(
+    email = serializers.CharField(
+        min_length=6,
         max_length=254,
     )
     username = serializers.CharField(
         min_length=4,
         max_length=150,
+        required=True,
     )
     first_name = serializers.CharField(
         min_length=4,
@@ -30,9 +32,9 @@ class UserRegistrationSerializer(serializers.Serializer):
         required=False,
     )
     last_name = serializers.CharField(
-        required=False,
         min_length=4,
         max_length=150,
+        required=False
     )
     bio = serializers.CharField(
         required=False
@@ -42,29 +44,11 @@ class UserRegistrationSerializer(serializers.Serializer):
         required=False
     )
 
-    # TODO Рефакторинг - last_name проверяем на уровне полей, а не валидациu
-    # def validate_last_name(self, value):
-    #     if len(value) < 4 or len(value) > 150:
-    #         raise serializers.ValidationError("Фамилия должна быть от 4 до 150 символов")
-    #     return value
-
     def validate_username(self, value: str) -> str:
         if value.lower() == "me":
             raise serializers.ValidationError("Недопустимое имя пользователя")
         if not re.fullmatch(r"^[\w.@+-]+\Z", value):
             raise serializers.ValidationError("Никнейм содержит недопустимы символы!")
-        # if 4 < len(value) > 150:
-        #     raise serializers.ValidationError(
-        #         "Количество символов в никнейме должно быть от 4 до 150",
-        #     )
-        return value
-
-    # TODO Рефакторинг - email проверяем на уровне полей, а не валидациu
-    def validate_email(self, value):
-        if 6 < len(value) > 256:
-            raise serializers.ValidationError(
-                "Количество символов названия почты должно быть от 6 до 256",
-            )
         return value
 
 

@@ -36,7 +36,8 @@ class UserMeView(views.APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response(
-                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    {"error": str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -72,10 +73,9 @@ class UserViewSet(viewsets.ModelViewSet):
             # Обновляем код подтверждения и отправляем его повторно
             existing_user_email.confirmation_code = confirmation_code
             existing_user_email.save()
-
             self.send_confirmation_email(existing_user_email, confirmation_code)
+            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(serializer.data)
         # Если email существует (username уникален)
         if existing_user_email:
             return Response(
@@ -178,6 +178,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         except TokenError as e:
             raise InvalidToken(e.args[0])
         except User.DoesNotExist:
-            raise serializers.ValidationError("Пользователь не найден")
+            raise serializers.ValidationError("Пользователь не найден",
+                                              code=status.HTTP_404_NOT_FOUND)
 
         return Response(data, status=status.HTTP_200_OK)
