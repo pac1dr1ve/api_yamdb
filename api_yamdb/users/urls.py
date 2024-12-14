@@ -1,10 +1,10 @@
 from django.urls import path
 
-from .views import UserViewSet, ObtainAuthToken, UserMeView
+from users.views import UserViewSet, CustomTokenObtainPairView, UserMeView
 
 urlpatterns = [
     path("auth/signup/", UserViewSet.as_view({"post": "create"}), name="auth_signup"),
-    path("auth/token/", ObtainAuthToken.as_view(), name="token_obtain"),
+    path("auth/token/", CustomTokenObtainPairView.as_view()),
     path("users/me/", UserMeView.as_view(), name="users_me"),
     path("users/<str:username>/", UserViewSet.as_view({"get": "retrieve",
                                                        "delete": "destroy"}), name="user_detail"),

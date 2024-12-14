@@ -6,17 +6,18 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase
+from rest_framework_simplejwt import serializers
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 from users.serializers import (
     UserRegistrationSerializer,
     UserSerializer,
-    ChangePasswordSerializer,
-    UserTokenSerializer,
+    ChangePasswordSerializer, UserTokenSerializer,
 )
 
 
@@ -40,29 +41,6 @@ class UserMeView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserEndpointTestCase(APITestCase):
-    def test_unauthorized_access(self):
-        # Незарегистрированным пользователям не доступен эндпоинт api/v1/users/
-        url = reverse('api:v1:users')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # Пользователям без роли admin или superuser не доступен эндпоинт api/v1/users/{username}/
-        user = UserViewSet
-
-        url_with_username = reverse()
-        self.client.force_authenticate(user=user)
-        response_with_username = self.client.get(url_with_username)
-        self.assertEqual(response_with_username.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_moderator_access(self):
-        moderator = User.objects.create_user(role='moderator')
-        url_moderator = reverse('api:v1:users')
-        self.client.force_authenticate(user=moderator)
-        response_moderator = self.client.get(url_moderator)
-        self.assertEqual(response_moderator.status_code, status.HTTP_403_FORBIDDEN)
-
-
 class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
@@ -71,6 +49,10 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
 
     def create(self, request, *args, **kwargs):
+        # if not request.user.is_authenticated:
+        #     return Response("Незарегистрированный пользователь",
+        #                     status=status.HTTP_401_UNAUTHORIZED)
+
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -81,48 +63,45 @@ class UserViewSet(viewsets.ModelViewSet):
         existing_user_email = User.objects.filter(email=email).first()
         existing_user_username = User.objects.filter(username=username).first()
 
-        if existing_user_email:
+        confirmation_code = "".join(
+            random.choices(string.ascii_uppercase + string.digits, k=5),
+        )
+
+        # Если username и email существуют, отправляем confirmation_code
+        if existing_user_email and existing_user_username:
             # Обновляем код подтверждения и отправляем его повторно
-            confirmation_code = "".join(
-                random.choices(string.ascii_uppercase + string.digits, k=50),
-            )
             existing_user_email.confirmation_code = confirmation_code
             existing_user_email.save()
 
             self.send_confirmation_email(existing_user_email, confirmation_code)
-            return Response(
-                {"detail": "Код подтверждения отправлен повторно."},
-                status=status.HTTP_200_OK,
-            )
 
+            return Response(serializer.data)
+        # Если email существует (username уникален)
+        if existing_user_email:
+            return Response(
+                {"detail": "Пользователь с таким email уже существует."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Если username существует (email уникален)
         if existing_user_username:
             return Response(
                 {"detail": "Пользователь с таким username уже существует."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Если username и email уникальны
         # Создание нового пользователя
         user = User.objects.create_user(
             username=username, email=email, role=role,
         )
-        user.set_unusable_password()
-        confirmation_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=50),
-        )
+
         user.confirmation_code = confirmation_code
         user.save()
-
         # Отправляем код подтверждения на email
         self.send_confirmation_email(user, confirmation_code)
+
         return Response(
-            {
-                "email": user.email,
-                "username": user.username,
-                # "role": user.role,
-                # "first_name": user.first_name,
-                # "last_name": user.last_name,
-                # "bio": user.bio
-            },
+            serializer.data,
             status=status.HTTP_200_OK,
         )
 
@@ -183,18 +162,22 @@ class UserViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class ObtainAuthToken(views.APIView):
-    permission_classes = (AllowAny,)
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = UserTokenSerializer
 
-    def get(self, request):
-        return Response(status=status.HTTP_200_OK)
+    def post(self, request: Request, *args, **kwargs) -> Response:
+        serializer = self.get_serializer(data=request.data)
 
-    def post(self, request):
-        serializer = UserTokenSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data["user"]
-            refresh = RefreshToken.for_user(user)
-            return Response(
-                {"token": str(refresh.access_token)}, status=status.HTTP_200_OK,
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.is_valid(raise_exception=True)
+            user = User.objects.get(username=serializer.validated_data.get("username"))
+            token = RefreshToken.for_user(user)
+            data = {
+                "token": str(token.access_token),
+            }
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Пользователь не найден")
+
+        return Response(data, status=status.HTTP_200_OK)
