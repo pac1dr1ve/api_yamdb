@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from reviews.models import User
 
-
 from users.models import User
 
 
@@ -20,20 +19,9 @@ class UserTokenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.CharField(
-        min_length=6,
-        max_length=254,
-    )
-    username = serializers.CharField(
-        min_length=4,
-        max_length=150,
-        required=True,
-    )
-    first_name = serializers.CharField(
-        min_length=4,
-        max_length=150,
-        required=False,
-    )
+    email = serializers.CharField(min_length=6, max_length=254)
+    username = serializers.CharField(min_length=4, max_length=150,required=True)
+    first_name = serializers.CharField(min_length=4, max_length=150, required=False)
     last_name = serializers.CharField(min_length=4, max_length=150, required=False)
     bio = serializers.CharField(required=False)
     # TODO использовать enum.role
