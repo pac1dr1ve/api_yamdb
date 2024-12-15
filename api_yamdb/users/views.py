@@ -59,7 +59,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
 
         serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            errors = serializer.errors
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
         role = serializer.validated_data.pop("role", "user")
         email = serializer.validated_data["email"]
