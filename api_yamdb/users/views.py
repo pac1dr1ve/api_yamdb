@@ -50,10 +50,6 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
 
     def create(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return Response("Незарегистрированный пользователь",
-        #                     status=status.HTTP_401_UNAUTHORIZED)
-
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -74,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
             existing_user_email.confirmation_code = confirmation_code
             existing_user_email.save()
             self.send_confirmation_email(existing_user_email, confirmation_code)
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data)
 
         # Если email существует (username уникален)
         if existing_user_email:
@@ -148,14 +144,14 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def user_delete(self, request, username):
         user = get_object_or_404(User, username=username)
-        if request.user.is_admin or request.user.is_superuser:
+        if request.user.is_staff or request.user.is_superuser:
             user.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().order_by("date_joined")
         username = self.request.query_params.get("search")
         if username is not None:
             queryset = queryset.filter(username__icontains=username).distinct()
