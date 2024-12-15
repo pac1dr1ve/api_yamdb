@@ -1,11 +1,15 @@
 import random
 import string
+
 from django.core.mail import send_mail
-from rest_framework import status, views, viewsets, permissions, generics
+
+from rest_framework import status, viewsets, permissions, generics
+
+
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt import serializers
@@ -15,9 +19,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 from users.serializers import (
-    UserRegistrationSerializer,
     UserSerializer,
-    ChangePasswordSerializer, UserTokenSerializer,
+    ChangePasswordSerializer,
+    UserTokenSerializer,
+    UserRegistrationSerializer,
 )
 
 
@@ -46,7 +51,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_permissions(self):
@@ -59,6 +64,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
 
         serializer = UserRegistrationSerializer(data=request.data)
+
         if not serializer.is_valid():
             errors = serializer.errors
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
@@ -158,14 +164,12 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 
-    @action(detail=False)
-    def user_delete(self, request, username):
-        user = get_object_or_404(User, username=username)
-        if request.user.is_admin or request.user.is_superuser:
-            user.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+    @action(detail=False, methods=['delete'])
+    def user_delete(self, request):
+        user = request.user
+        user.delete()
+        return Response("User deleted successfully",
+                        status=status.HTTP_200_OK)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -191,7 +195,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         except TokenError as e:
             raise InvalidToken(e.args[0])
         except User.DoesNotExist:
-            raise serializers.ValidationError("Пользователь не найден",
-                                              code=status.HTTP_404_NOT_FOUND)
+            raise serializers.ValidationError(
+                "Пользователь не найден", code=status.HTTP_404_NOT_FOUND
+            )
 
         return Response(data, status=status.HTTP_200_OK)

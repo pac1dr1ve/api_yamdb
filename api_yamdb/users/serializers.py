@@ -1,4 +1,3 @@
-
 from django.core.validators import RegexValidator
 from rest_framework import serializers
 
@@ -29,6 +28,8 @@ class UserRegistrationSerializer(serializers.Serializer):
         max_length=150,
         required=False,
     )
+    username = serializers.CharField(min_length=4, max_length=150, required=True)
+    first_name = serializers.CharField(min_length=4, max_length=150, required=False)
     last_name = serializers.CharField(min_length=4, max_length=150, required=False)
     bio = serializers.CharField(required=False)
     # TODO использовать enum.role
