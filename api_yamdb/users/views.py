@@ -1,5 +1,6 @@
 import random
 import string
+
 from django.core.mail import send_mail
 from rest_framework import status, views, viewsets
 from rest_framework.decorators import action
@@ -15,9 +16,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 from users.serializers import (
-    UserRegistrationSerializer,
     UserSerializer,
-    ChangePasswordSerializer, UserTokenSerializer,
+    ChangePasswordSerializer,
+    UserTokenSerializer,
+    UserRegistrationSerializer,
 )
 
 
@@ -50,60 +52,19 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
 
     def create(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return Response("Незарегистрированный пользователь",
-        #                     status=status.HTTP_401_UNAUTHORIZED)
-
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        role = serializer.validated_data.pop("role", "user")
-        email = serializer.validated_data["email"]
-        username = serializer.validated_data["username"]
+        # Создаем confirmation_code
+        confirmation_code = self.create_confirmation_code()
 
-        existing_user_email = User.objects.filter(email=email).first()
-        existing_user_username = User.objects.filter(username=username).first()
+        # Сохраняем пользователя
+        user = serializer.save(confirmation_code=confirmation_code)
 
-        confirmation_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=5),
-        )
-
-        # Если username и email существуют, отправляем confirmation_code
-        if existing_user_email and existing_user_username:
-            # Обновляем код подтверждения и отправляем его повторно
-            existing_user_email.confirmation_code = confirmation_code
-            existing_user_email.save()
-            self.send_confirmation_email(existing_user_email, confirmation_code)
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
-
-        # Если email существует (username уникален)
-        if existing_user_email:
-            return Response(
-                {"detail": "Пользователь с таким email уже существует."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Если username существует (email уникален)
-        if existing_user_username:
-            return Response(
-                {"detail": "Пользователь с таким username уже существует."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Если username и email уникальны
-        # Создание нового пользователя
-        user = User.objects.create_user(
-            username=username, email=email, role=role,
-        )
-
-        user.confirmation_code = confirmation_code
-        user.save()
         # Отправляем код подтверждения на email
         self.send_confirmation_email(user, confirmation_code)
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK,
-        )
+        return Response(user)
 
     def update(self, request, *args, **kwargs):
         user = get_object_or_404(User, username=self.kwargs["username"])
@@ -137,6 +98,14 @@ class UserViewSet(viewsets.ModelViewSet):
             [user.email],
             fail_silently=False,
         )
+        return user
+
+    @staticmethod
+    def create_confirmation_code():
+        confirmation_code = "".join(
+            random.choices(string.ascii_uppercase + string.digits, k=5),
+        )
+        return confirmation_code
 
     @action(detail=False, methods=["get"])
     def current_user(self, request):
@@ -178,7 +147,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         except TokenError as e:
             raise InvalidToken(e.args[0])
         except User.DoesNotExist:
-            raise serializers.ValidationError("Пользователь не найден",
-                                              code=status.HTTP_404_NOT_FOUND)
+            raise serializers.ValidationError(
+                "Пользователь не найден", code=status.HTTP_404_NOT_FOUND
+            )
 
         return Response(data, status=status.HTTP_200_OK)
