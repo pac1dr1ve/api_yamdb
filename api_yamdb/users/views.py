@@ -1,7 +1,7 @@
 import random
 import string
 from django.core.mail import send_mail
-from rest_framework import status, views, viewsets
+from rest_framework import status, views, viewsets, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
@@ -21,12 +21,12 @@ from users.serializers import (
 )
 
 
-class UserMeView(views.APIView):
+class UserMeView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
 
-    def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+    def get_object(self):
+        return self.request.user
 
     def patch(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
@@ -49,20 +49,64 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     pagination_class = PageNumberPagination
 
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        elif self.action in ['current_user', 'partial_update', 'user_delete']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
+
     def create(self, request, *args, **kwargs):
+
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Создаем confirmation_code
+        role = serializer.validated_data.pop("role", "user")
+        email = serializer.validated_data["email"]
+        username = serializer.validated_data["username"]
+
+        existing_user_email = User.objects.filter(email=email).first()
+        existing_user_username = User.objects.filter(username=username).first()
+
         confirmation_code = self.create_confirmation_code()
 
-        # Сохраняем пользователя
-        user = serializer.save(confirmation_code=confirmation_code)
+        # Если username и email существуют, отправляем confirmation_code
+        if existing_user_email and existing_user_username:
+            # Обновляем код подтверждения и отправляем его повторно
+            existing_user_email.confirmation_code = confirmation_code
+            existing_user_email.save()
 
+            self.send_confirmation_email(existing_user_email, confirmation_code)
+
+            return Response(serializer.data)
+        # Если email существует (username уникален)
+        if existing_user_email:
+            return Response(
+                {"detail": "Пользователь с таким email уже существует."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Если username существует (email уникален)
+        if existing_user_username:
+            return Response(
+                {"detail": "Пользователь с таким username уже существует."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Если username и email уникальны
+        # Создание нового пользователя
+        user = User.objects.create_user(
+            username=username, email=email, role=role,
+        )
+
+        user.confirmation_code = confirmation_code
+        user.save()
         # Отправляем код подтверждения на email
         self.send_confirmation_email(user, confirmation_code)
 
-        return Response(user)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
     def update(self, request, *args, **kwargs):
         user = get_object_or_404(User, username=self.kwargs["username"])

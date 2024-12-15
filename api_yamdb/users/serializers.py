@@ -1,5 +1,6 @@
 import re
 
+from django.core.validators import RegexValidator
 from rest_framework import serializers
 
 from reviews.models import User
@@ -20,15 +21,11 @@ class UserTokenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.CharField(
-        min_length=6,
-        max_length=254,
-    )
-    username = serializers.CharField(
-        min_length=4,
-        max_length=150,
-        required=True,
-    )
+    email = serializers.CharField(min_length=6,max_length=254)
+    username_validator = RegexValidator(r'^[\w.@+-]+$',
+                                        message="Никнейм содержит недопустимы символы!")
+    username = serializers.CharField(min_length=4,max_length=150,
+                                     validators=[username_validator])
     first_name = serializers.CharField(
         min_length=4,
         max_length=150,
@@ -39,11 +36,9 @@ class UserRegistrationSerializer(serializers.Serializer):
     # TODO использовать enum.role
     role = serializers.CharField(required=False)
 
-    def validate_username(self, value: str) -> str:
+    def validate_username(self, value):
         if value.lower() == "me":
             raise serializers.ValidationError("Недопустимое имя пользователя")
-        if not re.fullmatch(r"^[\w.@+-]+\Z", value):
-            raise serializers.ValidationError("Никнейм содержит недопустимы символы!")
         return value
 
     def validate(self, data):

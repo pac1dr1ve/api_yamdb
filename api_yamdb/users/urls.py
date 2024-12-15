@@ -1,7 +1,10 @@
+from api.urls import v1_router
 from django.urls import path
 
 from users.views import UserViewSet, CustomTokenObtainPairView, UserMeView
 
+
+v1_router.register('users', UserViewSet, basename='users')
 urlpatterns = [
     path("auth/signup/", UserViewSet.as_view({"post": "create"}), name="auth_signup"),
     path("auth/token/", CustomTokenObtainPairView.as_view()),
