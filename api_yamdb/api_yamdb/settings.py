@@ -122,3 +122,10 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = f"{BASE_DIR}/emails/"
+
+DJOSER = {
+    "LOGIN_FIELD": "username",
+    "SERIALIZERS": {
+        "token_create": "djoser.serializers.TokenCreateSerializer",
+    },
+}
