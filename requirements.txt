@@ -9,6 +9,6 @@ pytest-pythonpath==0.7.3
 setuptools==75.6.0
 simplejwt==2.0.1
 djoser==2.3.1
-django-filter==24.3
+django-filter==23.5
 
 

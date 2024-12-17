@@ -1,11 +1,15 @@
 import random
 import string
+
 from django.core.mail import send_mail
-from rest_framework import status, views, viewsets
+
+from rest_framework import status, viewsets, permissions, generics
+
+
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt import serializers
@@ -15,18 +19,19 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 from users.serializers import (
-    UserRegistrationSerializer,
     UserSerializer,
-    ChangePasswordSerializer, UserTokenSerializer,
+    ChangePasswordSerializer,
+    UserTokenSerializer,
+    UserRegistrationSerializer,
 )
 
 
-class UserMeView(views.APIView):
+class UserMeView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
 
-    def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+    def get_object(self):
+        return self.request.user
 
     def patch(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
@@ -36,7 +41,8 @@ class UserMeView(views.APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response(
-                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    {"error": str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -45,16 +51,23 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
 
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        elif self.action in ['current_user', 'partial_update', 'user_delete']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
+
     def create(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return Response("Незарегистрированный пользователь",
-        #                     status=status.HTTP_401_UNAUTHORIZED)
 
         serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        if not serializer.is_valid():
+            errors = serializer.errors
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
         role = serializer.validated_data.pop("role", "user")
         email = serializer.validated_data["email"]
@@ -63,9 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
         existing_user_email = User.objects.filter(email=email).first()
         existing_user_username = User.objects.filter(username=username).first()
 
-        confirmation_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=5),
-        )
+        confirmation_code = self.create_confirmation_code()
 
         # Если username и email существуют, отправляем confirmation_code
         if existing_user_email and existing_user_username:
@@ -137,6 +148,14 @@ class UserViewSet(viewsets.ModelViewSet):
             [user.email],
             fail_silently=False,
         )
+        return user
+
+    @staticmethod
+    def create_confirmation_code():
+        confirmation_code = "".join(
+            random.choices(string.ascii_uppercase + string.digits, k=5),
+        )
+        return confirmation_code
 
     @action(detail=False, methods=["get"])
     def current_user(self, request):
@@ -145,14 +164,12 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 
-    @action(detail=False)
-    def user_delete(self, request, username):
-        user = get_object_or_404(User, username=username)
-        if request.user.is_admin or request.user.is_superuser:
-            user.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+    @action(detail=False, methods=['delete'])
+    def user_delete(self, request):
+        user = request.user
+        user.delete()
+        return Response("User deleted successfully",
+                        status=status.HTTP_200_OK)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -178,6 +195,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         except TokenError as e:
             raise InvalidToken(e.args[0])
         except User.DoesNotExist:
-            raise serializers.ValidationError("Пользователь не найден")
+            raise serializers.ValidationError(
+                "Пользователь не найден", code=status.HTTP_404_NOT_FOUND
+            )
 
         return Response(data, status=status.HTTP_200_OK)

@@ -1,13 +1,12 @@
-import re
-
+from django.core.validators import RegexValidator
 from rest_framework import serializers
 
-from reviews.models import User
+from users.models import User
 
 
 class UserTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=10)
+    confirmation_code = serializers.CharField(max_length=5)
 
     def validate(self, data):
         user = User.objects.get(username=data.get("username"))
@@ -17,55 +16,54 @@ class UserTokenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-        max_length=254,
-    )
-    username = serializers.CharField(
-        min_length=4,
-        max_length=150,
-    )
+    email = serializers.CharField(min_length=6, max_length=254)
+    username_validator = RegexValidator(r'^[\w.@+-]+$',
+                                        message="Никнейм содержит недопустимы символы!")
+    username = serializers.CharField(min_length=4, max_length=150,
+                                     validators=[username_validator])
     first_name = serializers.CharField(
         min_length=4,
         max_length=150,
         required=False,
     )
-    last_name = serializers.CharField(
-        required=False,
-        min_length=4,
-        max_length=150,
-    )
-    bio = serializers.CharField(
-        required=False
-    )
+    last_name = serializers.CharField(min_length=4, max_length=150, required=False)
+    bio = serializers.CharField(required=False)
     # TODO использовать enum.role
-    role = serializers.CharField(
-        required=False
-    )
+    role = serializers.CharField(required=False)
 
-    # TODO Рефакторинг - last_name проверяем на уровне полей, а не валидациu
-    # def validate_last_name(self, value):
-    #     if len(value) < 4 or len(value) > 150:
-    #         raise serializers.ValidationError("Фамилия должна быть от 4 до 150 символов")
-    #     return value
-
-    def validate_username(self, value: str) -> str:
+    def validate_username(self, value):
         if value.lower() == "me":
             raise serializers.ValidationError("Недопустимое имя пользователя")
-        if not re.fullmatch(r"^[\w.@+-]+\Z", value):
-            raise serializers.ValidationError("Никнейм содержит недопустимы символы!")
-        # if 4 < len(value) > 150:
-        #     raise serializers.ValidationError(
-        #         "Количество символов в никнейме должно быть от 4 до 150",
-        #     )
         return value
 
-    # TODO Рефакторинг - email проверяем на уровне полей, а не валидациu
-    def validate_email(self, value):
-        if 6 < len(value) > 256:
+    def validate(self, data):
+        email = data.get("email")
+        username = data.get("username")
+
+        # Проверяем наличие пользователя по email
+        user_by_email = User.objects.filter(email=email).first()
+        # Проверяем наличие пользователя по username
+        user_by_username = User.objects.filter(username=username).first()
+
+        # Если email и username принадлежат одному пользователю
+        if user_by_email and user_by_email == user_by_username:
+            return data
+
+        # Если email и username принадлежат разным пользователям
+        if user_by_email and user_by_username:
             raise serializers.ValidationError(
-                "Количество символов названия почты должно быть от 6 до 256",
+                {"email": "Email уже занят.", "username": "Username уже занят."}
             )
-        return value
+
+        # Если email занят, но username другой
+        if user_by_email:
+            raise serializers.ValidationError({"email": "Email уже занят."})
+
+        # Если username занят, но email другой
+        if user_by_username:
+            raise serializers.ValidationError({"username": "Username уже занят."})
+
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
