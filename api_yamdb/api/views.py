@@ -11,8 +11,11 @@ from .serializers import (
     CommentSerializer,
     GenreSerializer,
     TitleSerializer,
+    TitleSerializerForWrite,
     ReviewSerializer
 )
+
+from .filters import TitleFilter
 from .mixins import CategoryAndGenreMixin
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
 
@@ -51,7 +54,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'partial_update'):
+            return TitleSerializerForWrite
+        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
