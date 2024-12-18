@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -96,6 +97,7 @@ class Review(models.Model):
     )
 
     class Meta:
+        unique_together = ('author', 'title')
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 

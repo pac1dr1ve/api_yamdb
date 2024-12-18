@@ -1,7 +1,9 @@
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import viewsets, permissions, status
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.response import Response
 
@@ -68,8 +70,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (
-        IsAdminOrModeratorOrReadOnly, IsAdminOrReadOnly
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAdminOrModeratorOrReadOnly,
     )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -85,8 +89,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (
-        IsAdminOrModeratorOrReadOnly, IsAdminOrReadOnly
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAdminOrModeratorOrReadOnly,
     )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs['review_id'])

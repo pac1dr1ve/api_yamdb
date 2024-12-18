@@ -79,4 +79,10 @@ class ReviewSerializer(serializers.ModelSerializer):
                 )
             except Review.DoesNotExist:
                 pass
+
+        if not 1 <= data['score'] <= 10:
+            raise serializers.ValidationError(
+                {'score': ['Оценка должна быть от 1 до 10.']}
+            )
+
         return data

@@ -13,7 +13,7 @@ from .views import (
 
 v1_router = DefaultRouter()
 v1_router.register(
-    r'title/(?P<title_id>\d+)/reviews',
+    r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
     basename='reviews'
 )
