@@ -16,11 +16,11 @@ class UserTokenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.CharField(min_length=6, max_length=254)
+    email = serializers.CharField(min_length=6, max_length=254, required=True)
     username_validator = RegexValidator(r'^[\w.@+-]+$',
                                         message="Никнейм содержит недопустимы символы!")
     username = serializers.CharField(min_length=4, max_length=150,
-                                     validators=[username_validator])
+                                     validators=[username_validator], required=True)
     first_name = serializers.CharField(
         min_length=4,
         max_length=150,

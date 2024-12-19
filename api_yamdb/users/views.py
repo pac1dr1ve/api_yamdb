@@ -192,11 +192,10 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             data = {
                 "token": str(token.access_token),
             }
+            return Response(data, status=status.HTTP_200_OK)
+        
         except TokenError as e:
             raise InvalidToken(e.args[0])
+        
         except User.DoesNotExist:
-            raise serializers.ValidationError(
-                "Пользователь не найден", code=status.HTTP_404_NOT_FOUND
-            )
-
-        return Response(data, status=status.HTTP_200_OK)
+            return Response("Пользователь не найден", status=status.HTTP_404_NOT_FOUND)
