@@ -18,6 +18,7 @@ from users.serializers import (
     UserSerializer,
     UserTokenSerializer,
     UserRegistrationSerializer, SignUpSerializer,
+
 )
 
 
@@ -124,28 +125,8 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-    # def update(self, request, *args, **kwargs):
-    #     user = get_object_or_404(User, username=self.kwargs["username"])
-    #     serializer = ChangePasswordSerializer(data=request.data)
-    #
-    #     if serializer.is_valid():
-    #         if not user.check_password(serializer.validated_data["old_password"]):
-    #             return Response(
-    #                 {"old_password": ["Неправильный пароль."]},
-    #                 status=status.HTTP_400_BAD_REQUEST,
-    #             )
-    #         user.set_password(serializer.validated_data["new_password"])
-    #         user.save()
-    #         return Response(
-    #             {
-    #                 "status": "success",
-    #                 "code": status.HTTP_200_OK,
-    #                 "message": "Пароль обновлен успешно",
-    #                 "data": [],
-    #             },
-    #             status=status.HTTP_200_OK,
-    #         )
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def update(self, request, *args, **kwargs):
+        pass
 
     @staticmethod
     def send_confirmation_email(user, confirmation_code):

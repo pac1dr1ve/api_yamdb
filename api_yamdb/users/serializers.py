@@ -7,7 +7,7 @@ from users.models import User
 
 class UserTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=10)
+    confirmation_code = serializers.CharField(max_length=5)
 
     def validate(self, data):
         user = User.objects.get(username=data.get("username"))
@@ -18,8 +18,10 @@ class UserTokenSerializer(serializers.Serializer):
 
 class UserRegistrationSerializer(serializers.Serializer):
     email = serializers.CharField(min_length=6, max_length=254)
-    username_validator = RegexValidator(r"^[\w.@+-]+\Z",
-                                        message="Никнейм содержит недопустимы символы!")
+    username_validator = RegexValidator(
+        r"^[\w.@+-]+\Z",
+        message="Никнейм содержит недопустимы символы!"
+    )
     username = serializers.CharField(min_length=4, max_length=150,
                                      validators=[username_validator])
     first_name = serializers.CharField(
