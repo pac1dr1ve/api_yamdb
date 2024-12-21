@@ -5,6 +5,7 @@ import string
 from django.core.mail import send_mail
 from rest_framework import status, viewsets, permissions, generics, filters
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -17,7 +18,7 @@ from users.models import User
 from users.serializers import (
     UserSerializer,
     UserTokenSerializer,
-    UserRegistrationSerializer, SignUpSerializer,
+    UserRegistrationSerializer, SignUpSerializer, ChangePasswordSerializer,
 
 )
 
@@ -112,7 +113,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # Если username и email уникальны
         # Создание нового пользователя
         user = User.objects.create_user(
-            username=username, email=email, role=role,
+            username=username, email=email, role=role
         )
 
         user.confirmation_code = confirmation_code
@@ -126,7 +127,28 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
     def update(self, request, *args, **kwargs):
-        pass
+        # pass
+        user = get_object_or_404(User, username=self.kwargs["username"])
+        serializer = ChangePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            if not user.check_password(serializer.validated_data["old_password"]):
+                return Response(
+                    {"old_password": ["Неправильный пароль."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user.set_password(serializer.validated_data["new_password"])
+            user.save()
+            return Response(
+                {
+                    "status": "success",
+                    "code": status.HTTP_200_OK,
+                    "message": "Пароль обновлен успешно",
+                    "data": [],
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def send_confirmation_email(user, confirmation_code):
@@ -157,7 +179,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def user_delete(self, request):
         user = request.user
         user.delete()
-        return Response("User deleted successfully",
+        return Response("Пользователь успешно удален",
                         status=status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -175,6 +197,7 @@ class SignUpView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             user = User.objects.create_user(**serializer.validated_data)
             user.is_active = False
