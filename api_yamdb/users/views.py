@@ -64,7 +64,7 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'list':
             return [permissions.IsAuthenticated()]
         elif self.action == 'retrieve':
-            return [permissions.IsAdminUser()]
+            return [permissions.IsAdminUser()] or [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
     def list(self, request, *args, **kwargs):
@@ -125,7 +125,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(
             serializer.data,
-            status=status.HTTP_200_OK,
+            status=status.HTTP_201_CREATED
         )
 
     def update(self, request, *args, **kwargs):
