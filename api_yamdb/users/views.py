@@ -142,7 +142,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = (filters.SearchFilter,)
     search_fields = ("username",)
     pagination_class = PageNumberPagination
@@ -154,9 +154,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         elif self.action == 'list':
             return [permissions.IsAuthenticated()]
-        elif self.action == 'retrieve':
-            return [permissions.IsAdminUser()] or [permissions.IsAuthenticated()]
-        return [permissions.IsAdminUser()]
+        return [permissions.IsAdminUser(), permissions.IsAuthenticated()]
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -165,6 +163,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
     def update(self, request, *args, **kwargs):
+
         user = get_object_or_404(User, username=self.kwargs["username"])
         serializer = ChangePasswordSerializer(data=request.data)
 
@@ -187,12 +186,18 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['put'])
+    def user_update(self, request, **kwargs):
+        return Response("Недоступно",
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     @action(detail=False, methods=['delete'])
     def user_delete(self, request):
-        user = request.user
-        user.delete()
-        return Response("Пользователь успешно удален",
-                        status=status.HTTP_200_OK)
+        if request.user.is_staff:
+            user = request.user
+            user.delete()
+            return Response("Пользователь успешно удален", status=status.HTTP_204_NO_CONTENT)
+        return Response("Доступ запрещен", status=status.HTTP_403_FORBIDDEN)
 
     def get_queryset(self):
         queryset = super().get_queryset()

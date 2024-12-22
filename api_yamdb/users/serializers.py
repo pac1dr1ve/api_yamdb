@@ -17,7 +17,7 @@ class UserTokenSerializer(serializers.Serializer):
 
 class SignUpSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, min_length=8, required=False)
-    email = serializers.CharField(min_length=6, max_length=254, required=True)
+    email = serializers.EmailField(min_length=6, max_length=254, required=True)
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
         message="Никнейм содержит недопустимы символы!"
