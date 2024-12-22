@@ -35,15 +35,3 @@ class User(AbstractUser):
         choices=Enum.ROLES,
         default=Enum.USER,
     )
-
-    # @property
-    # def is_admin(self):
-    #     return self.role == Enum.ADMIN or self.is_superuser
-    #
-    # @property
-    # def is_moderator(self):
-    #     return self.role == Enum.MODERATOR
-    #
-    # @property
-    # def is_user(self):
-    #     return self.role == Enum.USER
