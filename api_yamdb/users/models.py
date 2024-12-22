@@ -6,16 +6,13 @@ from django.utils.translation import gettext_lazy as _
 # TODO добавить поле ROLE которое принимает 3 значения
 #  (user, moderator, admin). Использовать класс enum.
 class Enum:
+    ROLES = None
     USER = "user"
     MODERATOR = "moderator"
     ADMIN = "admin"
 
 
-ROLES = [
-    (Enum.USER, "User"),
-    (Enum.MODERATOR, "Moderator"),
-    (Enum.ADMIN, "Admin"),
-]
+ROLES = [Enum.USER, Enum.MODERATOR, Enum.ADMIN]
 
 
 class User(AbstractUser):
@@ -35,18 +32,18 @@ class User(AbstractUser):
     bio = models.TextField(verbose_name="Биография", blank=True)
     role = models.CharField(
         max_length=22,
-        choices=ROLES,
+        choices=Enum.ROLES,
         default=Enum.USER,
     )
 
-    @property
-    def is_admin(self):
-        return self.role == Enum.ADMIN or self.is_superuser
-
-    @property
-    def is_moderator(self):
-        return self.role == Enum.MODERATOR
-
-    @property
-    def is_user(self):
-        return self.role == Enum.USER
+    # @property
+    # def is_admin(self):
+    #     return self.role == Enum.ADMIN or self.is_superuser
+    #
+    # @property
+    # def is_moderator(self):
+    #     return self.role == Enum.MODERATOR
+    #
+    # @property
+    # def is_user(self):
+    #     return self.role == Enum.USER

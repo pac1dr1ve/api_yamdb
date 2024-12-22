@@ -14,7 +14,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.models import User
+from users.models import User, Enum
 from users.serializers import (
     UserSerializer,
     UserTokenSerializer,
@@ -51,7 +51,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     filter_backends = (filters.SearchFilter,)
     search_fields = ("username",)
     pagination_class = PageNumberPagination
@@ -63,6 +63,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         elif self.action == 'list':
             return [permissions.IsAuthenticated()]
+        elif self.action == 'retrieve':
+            return [permissions.IsAdminUser()]
         return [permissions.IsAdminUser()]
 
     def list(self, request, *args, **kwargs):
@@ -79,7 +81,7 @@ class UserViewSet(viewsets.ModelViewSet):
             errors = serializer.errors
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-        role = serializer.validated_data.pop("role", "user")
+        # role = serializer.validated_data.pop("role", "user")
         email = serializer.validated_data["email"]
         username = serializer.validated_data["username"]
 
@@ -113,7 +115,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # Если username и email уникальны
         # Создание нового пользователя
         user = User.objects.create_user(
-            username=username, email=email, role=role
+            username=username, email=email, role=Enum.USER
         )
 
         user.confirmation_code = confirmation_code
