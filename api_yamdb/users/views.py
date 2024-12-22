@@ -18,64 +18,18 @@ from users.models import User, Enum
 from users.serializers import (
     UserSerializer,
     UserTokenSerializer,
-    UserRegistrationSerializer, SignUpSerializer, ChangePasswordSerializer,
-
+    SignUpSerializer, ChangePasswordSerializer,
 )
 
 
-class UserMeView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-
-    def get_object(self):
-        return self.request.user
-
-    def patch(self, request):
-        username = request.data.get('username', None)
-
-        if username:
-            if not re.match(r"^[\w.@+-]+\Z", username):
-                return Response({"error": "Никнейм содержит недопустимы символы!"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    lookup_field = "username"
+class SignUpView(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
-    # permission_classes = [permissions.IsAuthenticated]
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("username",)
-    pagination_class = PageNumberPagination
-
-    def get_permissions(self):
-        if self.action == 'create':
-            return [permissions.AllowAny()]
-        elif self.action in ['current_user', 'partial_update', 'user_delete']:
-            return [permissions.IsAuthenticated()]
-        elif self.action == 'list':
-            return [permissions.IsAuthenticated()]
-        elif self.action == 'retrieve':
-            return [permissions.IsAdminUser()] or [permissions.IsAuthenticated()]
-        return [permissions.IsAdminUser()]
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+    serializer_class = SignUpSerializer
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
 
-        serializer = UserRegistrationSerializer(data=request.data)
+        serializer = SignUpSerializer(data=request.data)
 
         if not serializer.is_valid():
             errors = serializer.errors
@@ -125,11 +79,92 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(
             serializer.data,
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_200_OK
         )
 
+    def post(self, request, *args, **kwargs):
+        # serializer = self.get_serializer(data=request.data)
+        serializer = SignUpSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if serializer.is_valid():
+            user = User.objects.create_user(**serializer.validated_data)
+            user.is_active = False
+            user.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def send_confirmation_email(user, confirmation_code):
+        send_mail(
+            "Код подтверждения",
+            f"Ваш код подтверждения: {confirmation_code}",
+            "yamdb@example.com",
+            [user.email],
+            fail_silently=False,
+        )
+        return user
+
+    @staticmethod
+    def create_confirmation_code():
+        confirmation_code = "".join(
+            random.choices(string.ascii_uppercase + string.digits, k=5),
+        )
+        return confirmation_code
+
+
+class UserMeView(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def patch(self, request):
+        username = request.data.get('username', None)
+
+        if username:
+            if not re.match(r"^[\w.@+-]+\Z", username):
+                return Response({"error": "Никнейм содержит недопустимы символы!"},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    lookup_field = "username"
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("username",)
+    pagination_class = PageNumberPagination
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        elif self.action in ['partial_update', 'user_delete']:
+            return [permissions.IsAuthenticated()]
+        elif self.action == 'list':
+            return [permissions.IsAuthenticated()]
+        elif self.action == 'retrieve':
+            return [permissions.IsAdminUser()] or [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
     def update(self, request, *args, **kwargs):
-        # pass
         user = get_object_or_404(User, username=self.kwargs["username"])
         serializer = ChangePasswordSerializer(data=request.data)
 
@@ -152,31 +187,6 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @staticmethod
-    def send_confirmation_email(user, confirmation_code):
-        send_mail(
-            "Код подтверждения",
-            f"Ваш код подтверждения: {confirmation_code}",
-            "yamdb@example.com",
-            [user.email],
-            fail_silently=False,
-        )
-        return user
-
-    @staticmethod
-    def create_confirmation_code():
-        confirmation_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=5),
-        )
-        return confirmation_code
-
-    @action(detail=False, methods=["get"])
-    def current_user(self, request):
-        if request.user.is_authenticated:
-            serializer = self.get_serializer(request.user)
-            return Response(serializer.data)
-        return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
-
     @action(detail=False, methods=['delete'])
     def user_delete(self, request):
         user = request.user
@@ -190,24 +200,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if username is not None:
             queryset = queryset.filter(username=username).distinct()
         return queryset
-
-
-class SignUpView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = SignUpSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if serializer.is_valid():
-            user = User.objects.create_user(**serializer.validated_data)
-            user.is_active = False
-            user.save()
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

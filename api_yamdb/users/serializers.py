@@ -1,6 +1,5 @@
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from users.models import User
 
@@ -16,8 +15,9 @@ class UserTokenSerializer(serializers.Serializer):
         return data
 
 
-class UserRegistrationSerializer(serializers.Serializer):
-    email = serializers.CharField(min_length=6, max_length=254)
+class SignUpSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, min_length=8, required=False)
+    email = serializers.CharField(min_length=6, max_length=254, required=True)
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
         message="Никнейм содержит недопустимы символы!"
@@ -31,8 +31,9 @@ class UserRegistrationSerializer(serializers.Serializer):
     )
     last_name = serializers.CharField(min_length=4, max_length=150, required=False)
     bio = serializers.CharField(required=False)
-    # TODO использовать enum.role
-    role = serializers.CharField(required=False)
+
+    # # TODO использовать enum.role
+    # role = serializers.CharField(required=False)
 
     def validate_username(self, value):
         if value.lower() == "me":
@@ -71,28 +72,16 @@ class UserRegistrationSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(read_only=True)
+    username_validator = RegexValidator(
+        r"^[\w.@+-]+\Z",
+        message="Никнейм содержит недопустимы символы!"
+    )
+    username = serializers.CharField(min_length=4, max_length=150,
+                                     validators=[username_validator])
 
     class Meta:
         model = User
         fields = ("first_name", "last_name", "username", "bio", "email", "role")
-
-
-class SignUpSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    username = serializers.CharField(max_length=150, validators=[UniqueValidator(queryset=User.objects.all())])
-    password = serializers.CharField(write_only=True, min_length=8)
-
-    def validate(self, data):
-        username = data.get('username')
-        email = data.get('email')
-
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError({'username': 'Пользователь с таким именем уже существует.'})
-
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError({'email': 'Пользователь с таким email уже существует.'})
-
-        return data
 
 
 class ChangePasswordSerializer(serializers.Serializer):
