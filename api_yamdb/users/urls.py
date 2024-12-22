@@ -1,8 +1,7 @@
-from api.urls import v1_router
 from django.urls import path
 
+from api.urls import v1_router
 from users.views import UserViewSet, CustomTokenObtainPairView, UserMeView
-
 
 v1_router.register('users', UserViewSet, basename='users')
 urlpatterns = [
