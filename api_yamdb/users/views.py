@@ -123,11 +123,16 @@ class UserMeView(generics.RetrieveAPIView):
 
     def patch(self, request):
         username = request.data.get('username', None)
+        role = request.data.get('role', None)  # Добавляем получение роли пользователя
 
         if username:
             if not re.match(r"^[\w.@+-]+\Z", username):
                 return Response({"error": "Никнейм содержит недопустимы символы!"},
                                 status=status.HTTP_400_BAD_REQUEST)
+
+        if role:
+            return Response({"error": "Изменение роли пользователя недопустимо!"},
+                            status=status.HTTP_403_FORBIDDEN)
 
         serializer = UserSerializer(request.user, data=request.data, partial=True)
 
@@ -147,6 +152,12 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ("username",)
     pagination_class = PageNumberPagination
 
+    # def list(self, request, *args, **kwargs):  # добавлен метод list
+    #     self.permission_classes = [permissions.IsAdminUser, ]  # устанавливаем разрешения для администратора
+    #     response = super().list(request, *args, **kwargs)  # вызываем базовый метод list
+    #     self.permission_classes = [permissions.IsAuthenticated, ]  # возвращаем обычные разрешения
+    #     return response
+
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
@@ -154,50 +165,45 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         elif self.action == 'list':
             return [permissions.IsAuthenticated()]
-        return [permissions.IsAdminUser(), permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser(), ]
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+    @action(detail=True, methods=['get'])
+    def user_detail(self, request, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-
         user = get_object_or_404(User, username=self.kwargs["username"])
         serializer = ChangePasswordSerializer(data=request.data)
 
         if serializer.is_valid():
             if not user.check_password(serializer.validated_data["old_password"]):
-                return Response(
-                    {"old_password": ["Неправильный пароль."]},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return Response({"old_password": ["Неправильный пароль."]}, status=status.HTTP_400_BAD_REQUEST)
+
             user.set_password(serializer.validated_data["new_password"])
             user.save()
-            return Response(
-                {
-                    "status": "success",
-                    "code": status.HTTP_200_OK,
-                    "message": "Пароль обновлен успешно",
-                    "data": [],
-                },
-                status=status.HTTP_200_OK,
-            )
+            return Response({
+                "status": "success",
+                "code": status.HTTP_200_OK,
+                "message": "Пароль обновлен успешно",
+                "data": [],
+            }, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['put'])
-    def user_update(self, request, **kwargs):
-        return Response("Недоступно",
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    # @action(detail=False, methods=['put'])
+    # def user_update(self, request, **kwargs):
+    #     return Response("Недоступно", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @action(detail=False, methods=['delete'])
+    @action(detail=False, methods=['delete'])  # Метод удаления пользователя должен быть доступен только администратору
     def user_delete(self, request):
-        if request.user.is_staff:
-            user = request.user
-            user.delete()
-            return Response("Пользователь успешно удален", status=status.HTTP_204_NO_CONTENT)
-        return Response("Доступ запрещен", status=status.HTTP_403_FORBIDDEN)
+        user = self.get_object()
+        if not request.user.is_staff:
+            return Response("Доступ запрещен", status=status.HTTP_403_FORBIDDEN)
+
+        user.delete()
+        return Response("Пользователь успешно удален", status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         queryset = super().get_queryset()

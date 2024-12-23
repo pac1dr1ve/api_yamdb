@@ -71,7 +71,7 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(read_only=True)
+    # role = serializers.CharField(read_only=True)
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
         message="Никнейм содержит недопустимы символы!"
