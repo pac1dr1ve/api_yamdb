@@ -6,19 +6,35 @@ from reviews.models import Category, Comment, Genre, Review, Title
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True, default=None)
     category = CategorySerializer()
-    genre = GenreSerializer()
+    genre = GenreSerializer(many=True)
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitleSerializerForWrite(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
 
     class Meta:
         model = Title
@@ -28,6 +44,7 @@ class TitleSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True)
+    review = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Comment
@@ -38,6 +55,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True)
+    score = serializers.IntegerField()
+    title = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         fields = '__all__'
@@ -60,4 +79,10 @@ class ReviewSerializer(serializers.ModelSerializer):
                 )
             except Review.DoesNotExist:
                 pass
+
+        if not 1 <= data['score'] <= 10:
+            raise serializers.ValidationError(
+                {'score': ['Оценка должна быть от 1 до 10.']}
+            )
+
         return data
