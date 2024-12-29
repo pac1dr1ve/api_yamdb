@@ -16,12 +16,17 @@ from users.views import CustomTokenObtainPairView, UserMeView, UserViewSet, Sign
 #     path("users/current_user/", UserMeView.as_view(), name="current_user"),
 # ]
 v1_router = DefaultRouter()
+v1_router.register(r"users", UserViewSet, basename='user')
+
+
 urlpatterns = [
-    path("", include(v1_router.urls)),
+    # path("", include(v1_router.urls)),
     path("auth/signup/", SignUpView.as_view({"post": "create"}), name="signup"),
     path("auth/token/", CustomTokenObtainPairView.as_view(), name="token"),
     path("users/me/", UserMeView.as_view(), name="users_me"),
-    path("users/<str:username>/", UserViewSet.as_view({"get": "retrieve",
-                                                       "delete": "destroy"}), name="user_detail"),
+    # path("users/<str:username>/", UserViewSet.as_view({"get": "retrieve",
+    #                                                    "put": "update",
+    #                                                    "delete": "destroy"}),
+    #      name="user_detail"),
 
 ]
