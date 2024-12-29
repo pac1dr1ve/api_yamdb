@@ -17,7 +17,7 @@ from users.views import CustomTokenObtainPairView, UserMeView, UserViewSet, Sign
 # ]
 v1_router = DefaultRouter()
 urlpatterns = [
-    path("", include(v1_router.urls)),
+    path("api/v1/", include(v1_router.urls)),
     path("auth/signup/", SignUpView.as_view({"post": "create"}), name="signup"),
     path("auth/token/", CustomTokenObtainPairView.as_view(), name="token"),
     path("users/me/", UserMeView.as_view(), name="users_me"),
