@@ -1,5 +1,4 @@
 import random
-import re
 import string
 
 from django.core.mail import send_mail
@@ -11,7 +10,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.models import User, Enum, Role
+from users.models import User, Role
 from users.permissions import CustomIsAdminUserOrSuperuser
 from users.serializers import SignUpSerializer, UserSerializer, UserTokenSerializer
 
@@ -29,7 +28,6 @@ class SignUpView(viewsets.ModelViewSet):
             errors = serializer.errors
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # role = serializer.validated_data.pop("role", "user")
         email = serializer.validated_data["email"]
         username = serializer.validated_data["username"]
 
@@ -60,12 +58,10 @@ class SignUpView(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Если username и email уникальны
         # Создание нового пользователя
         user = User.objects.create_user(
             username=username, email=email, role=Role.USER.value
         )
-
         user.confirmation_code = confirmation_code
         user.save()
         # Отправляем код подтверждения на email
@@ -77,7 +73,6 @@ class SignUpView(viewsets.ModelViewSet):
         )
 
     def post(self, request, *args, **kwargs):
-        # serializer = self.get_serializer(data=request.data)
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -108,46 +103,41 @@ class SignUpView(viewsets.ModelViewSet):
         return confirmation_code
 
 
-class UserMeView(generics.RetrieveAPIView):
+class UserMeView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = "pk"
 
-    # def get_object(self):
-    #     return self.request.user
+    def get_object(self):
+        return self.request.user
 
-    def patch(self, request):
+    def patch(self, request, *args, **kwargs):
         username = request.data.get('username', None)
-        role = request.data.get('role', None)  # Добавляем получение роли пользователя
 
-        if username and User.objects.filter(username=username).exists():
+        if username and User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
             return Response({"error": "Это username уже занято"},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        if username:
-            if not re.match(r"^[\w.@+-]+\Z", username):
-                return Response({"error": "Никнейм содержит недопустимы символы!"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        if role:
-            return Response({"error": "Изменение роли пользователя недопустимо!"},
-                            status=status.HTTP_403_FORBIDDEN)
 
         serializer = UserSerializer(request.user, data=request.data, partial=True)
 
         if serializer.is_valid():
+            # Проверяем, что роль не была изменена
+            if "role" in request.data and request.data["role"] != request.user.role:
+                return Response({"error": "Изменение роли для пользователя недопустимо!"},
+                                status=status.HTTP_405_METHOD_NOT_ALLOWED)
             serializer.save()
-            return Response(serializer.data)
 
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
+    search_fields = ("username",)
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ("username",)
 
     def get_permissions(self):
         if self.action in ['destroy', 'retrieve', 'partial_update', 'create', 'list']:
@@ -166,6 +156,16 @@ class UserViewSet(viewsets.ModelViewSet):
         """Обновление пароля пользователя"""
         user.set_password(new_password)
         user.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            self.perform_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_queryset(self):
         queryset = super().get_queryset()

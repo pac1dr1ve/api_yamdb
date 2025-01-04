@@ -24,9 +24,5 @@ urlpatterns = [
     path("auth/signup/", SignUpView.as_view({"post": "create"}), name="signup"),
     path("auth/token/", CustomTokenObtainPairView.as_view(), name="token"),
     path("users/me/", UserMeView.as_view(), name="users_me"),
-    # path("users/<str:username>/", UserViewSet.as_view({"get": "retrieve",
-    #                                                    "put": "update",
-    #                                                    "delete": "destroy"}),
-    #      name="user_detail"),
-
+    # path("users/<str:username>/", UserViewSet.as_view({"put": "update"}), name="user_detail"),
 ]

@@ -1,5 +1,6 @@
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from users.models import User
 
@@ -31,9 +32,6 @@ class SignUpSerializer(serializers.Serializer):
     )
     last_name = serializers.CharField(min_length=4, max_length=150, required=False)
     bio = serializers.CharField(required=False)
-
-    # # TODO использовать enum.role
-    # role = serializers.CharField(required=False)
 
     def validate_username(self, value):
         if value.lower() == "me":
@@ -71,17 +69,23 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # role = serializers.CharField(read_only=True)
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
         message="Никнейм содержит недопустимы символы!"
     )
-    username = serializers.CharField(min_length=4, max_length=150,
-                                     validators=[username_validator])
+    username = serializers.CharField(
+        min_length=4,
+        max_length=150,
+        validators=[
+            username_validator,
+            UniqueValidator(queryset=User.objects.all())
+        ]
+    )
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "username", "bio", "email", "role")
+        fields = ("first_name", "last_name", "username",
+                  "bio", "email", "role")
 
 
 class ChangePasswordSerializer(serializers.Serializer):
