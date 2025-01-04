@@ -4,8 +4,8 @@
 
 ### Развертывание проекта:
 1. Склонируйте репозиторий на ваш компьютер, командой: git clone {ваш проект}.git
-2. Установите зависимости. pip install -r requirements.txt
-3. Выполните миграции. python manage.py migrate
+2. Установите зависимости: pip install -r requirements.txt
+3. Выполните миграции: python manage.py migrate
 
 Теперь вы можете использовать Yamdb!
 ***
