@@ -19,8 +19,10 @@ class User(AbstractUser):
         max_length=150,
         unique=True,
     )
-    first_name = models.CharField(_("first name"), max_length=150, blank=True)
-    last_name = models.CharField(_("last name"), max_length=150, blank=True)
+    first_name = models.CharField(_("first name"),
+                                  max_length=150, blank=True)
+    last_name = models.CharField(_("last name"),
+                                 max_length=150, blank=True)
     bio = models.TextField(_("bio"), blank=True)
     role = models.CharField(
         max_length=20,
