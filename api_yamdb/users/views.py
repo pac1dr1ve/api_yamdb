@@ -16,7 +16,7 @@ from users.serializers import SignUpSerializer, UserSerializer, UserTokenSeriali
 
 
 class SignUpView(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     serializer_class = SignUpSerializer
     permission_classes = [permissions.AllowAny]
 
