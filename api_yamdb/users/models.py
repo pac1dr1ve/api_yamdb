@@ -35,3 +35,6 @@ class User(AbstractUser):
     @property
     def is_moderator(self):
         return self.role == Role.MODERATOR.value or self.is_superuser
+
+    class Meta:
+        ordering = ['id']

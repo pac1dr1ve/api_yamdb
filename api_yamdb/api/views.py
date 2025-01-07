@@ -22,7 +22,7 @@ from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
 
 
 class CategoryViewSet(CategoryAndGenreMixin):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
@@ -37,7 +37,7 @@ class CategoryViewSet(CategoryAndGenreMixin):
 
 
 class GenreViewSet(CategoryAndGenreMixin):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
@@ -52,7 +52,7 @@ class GenreViewSet(CategoryAndGenreMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by('name')
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
