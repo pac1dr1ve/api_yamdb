@@ -60,7 +60,7 @@ class SignUpView(viewsets.ModelViewSet):
 
         # Создание нового пользователя
         user = User.objects.create_user(
-            username=username, email=email, role=Role.USER.value
+            username=username, email=email, role=Role.USER.value,
         )
         user.confirmation_code = confirmation_code
         user.save()
@@ -69,7 +69,7 @@ class SignUpView(viewsets.ModelViewSet):
 
         return Response(
             serializer.data,
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     def post(self, request, *args, **kwargs):
@@ -113,7 +113,7 @@ class UserMeView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def patch(self, request, *args, **kwargs):
-        username = request.data.get('username', None)
+        username = request.data.get("username", None)
 
         if username and User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
             return Response({"error": "Это username уже занято"},
@@ -140,20 +140,20 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
 
     def get_permissions(self):
-        if self.action in ['destroy', 'retrieve', 'partial_update', 'create', 'list']:
+        if self.action in ["destroy", "retrieve", "partial_update", "create", "list"]:
             self.permission_classes = [CustomIsAdminUserOrSuperuser]
         else:
             self.permission_classes = [permissions.IsAuthenticated]
         return super().get_permissions()
 
     def check_password(self, user, old_password):
-        """Проверка пароля на корректность"""
+        """Проверка пароля на корректность."""
         if not user.check_password(old_password):
             return False
         return True
 
     def update_password(self, user, new_password):
-        """Обновление пароля пользователя"""
+        """Обновление пароля пользователя."""
         user.set_password(new_password)
         user.save()
 
@@ -162,7 +162,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(user, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
