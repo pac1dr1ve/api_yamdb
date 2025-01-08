@@ -2,15 +2,15 @@ import random
 import string
 
 from django.core.mail import send_mail
-from rest_framework import status, viewsets, permissions, generics, filters
+from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.models import User, Role
+from users.models import Role, User
 from users.permissions import CustomIsAdminUserOrSuperuser
 from users.serializers import SignUpSerializer, UserSerializer, UserTokenSerializer
 
@@ -32,39 +32,39 @@ class SignUpView(viewsets.ModelViewSet):
         username = serializer.validated_data["username"]
 
         existing_user_email = User.objects.filter(email=email).first()
-        existing_user_username = User.objects.filter(username=username).first()
+        existing_user_username = User.objects.filter(
+            username=username).first()
 
         confirmation_code = self.create_confirmation_code()
 
-        # Если username и email существуют, отправляем confirmation_code
         if existing_user_email and existing_user_username:
-            # Обновляем код подтверждения и отправляем его повторно
             existing_user_email.confirmation_code = confirmation_code
             existing_user_email.save()
 
             self.send_confirmation_email(existing_user_email, confirmation_code)
 
             return Response(serializer.data)
-        # Если email существует (username уникален)
+
         if existing_user_email:
             return Response(
                 {"detail": "Пользователь с таким email уже существует."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Если username существует (email уникален)
+
         if existing_user_username:
             return Response(
-                {"detail": "Пользователь с таким username уже существует."},
+                {"detail": "Пользователь с таким "
+                           "username уже существует."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Создание нового пользователя
         user = User.objects.create_user(
-            username=username, email=email, role=Role.USER.value,
+            username=username, email=email,
+            role=Role.USER.value,
         )
         user.confirmation_code = confirmation_code
         user.save()
-        # Отправляем код подтверждения на email
+
         self.send_confirmation_email(user, confirmation_code)
 
         return Response(
@@ -115,21 +115,27 @@ class UserMeView(generics.RetrieveUpdateAPIView):
     def patch(self, request, *args, **kwargs):
         username = request.data.get("username", None)
 
-        if username and User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
+        if username and User.objects.filter(
+                username=username).exclude(
+            pk=request.user.pk).exists():
             return Response({"error": "Это username уже занято"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer = UserSerializer(request.user,
+                                    data=request.data, partial=True)
 
         if serializer.is_valid():
-            # Проверяем, что роль не была изменена
-            if "role" in request.data and request.data["role"] != request.user.role:
-                return Response({"error": "Изменение роли для пользователя недопустимо!"},
+            if ("role" in request.data
+                    and request.data["role"] != request.user.role):
+                return Response({"error": "Изменение роли "
+                                          "для пользователя недопустимо!"},
                                 status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
             serializer.save()
 
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -140,7 +146,8 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
 
     def get_permissions(self):
-        if self.action in ["destroy", "retrieve", "partial_update", "create", "list"]:
+        if self.action in ["destroy", "retrieve",
+                           "partial_update", "create", "list"]:
             self.permission_classes = [CustomIsAdminUserOrSuperuser]
         else:
             self.permission_classes = [permissions.IsAuthenticated]
@@ -159,10 +166,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         user = self.get_object()
-        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer = self.get_serializer(user,
+                                         data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data,
+                        status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -183,7 +192,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            user = User.objects.get(username=serializer.validated_data.get("username"))
+            user = User.objects.get(username=serializer.
+                                    validated_data.get("username"))
             token = RefreshToken.for_user(user)
             data = {
                 "token": str(token.access_token),
