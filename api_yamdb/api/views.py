@@ -52,7 +52,11 @@ class GenreViewSet(CategoryAndGenreMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by('name')
+    queryset = (
+        Title.objects
+        .annotate(rating=Avg('reviews__score'))
+        .order_by('name')
+    )
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter

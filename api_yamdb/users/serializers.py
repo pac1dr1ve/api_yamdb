@@ -53,14 +53,19 @@ class SignUpSerializer(serializers.Serializer):
 
         if user_by_email and user_by_username:
             raise serializers.ValidationError(
-                {"email": "Email уже занят.", "username": "Username уже занят."},
+                {
+                    "email": "Email уже занят.",
+                    "username": "Username уже занят."
+                },
             )
 
         if user_by_email:
             raise serializers.ValidationError({"email": "Email уже занят."})
 
         if user_by_username:
-            raise serializers.ValidationError({"username": "Username уже занят."})
+            raise serializers.ValidationError(
+                {"username": "Username уже занят."}
+            )
 
         return data
 

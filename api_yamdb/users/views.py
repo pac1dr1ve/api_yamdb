@@ -12,7 +12,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import Role, User
 from users.permissions import CustomIsAdminUserOrSuperuser
-from users.serializers import SignUpSerializer, UserSerializer, UserTokenSerializer
+from users.serializers import (
+    SignUpSerializer,
+    UserSerializer,
+    UserTokenSerializer
+)
 
 
 class SignUpView(viewsets.ModelViewSet):
@@ -41,7 +45,8 @@ class SignUpView(viewsets.ModelViewSet):
             existing_user_email.confirmation_code = confirmation_code
             existing_user_email.save()
 
-            self.send_confirmation_email(existing_user_email, confirmation_code)
+            self.send_confirmation_email(
+                existing_user_email, confirmation_code)
 
             return Response(serializer.data)
 
@@ -117,7 +122,7 @@ class UserMeView(generics.RetrieveUpdateAPIView):
 
         if username and User.objects.filter(
                 username=username).exclude(
-            pk=request.user.pk).exists():
+                pk=request.user.pk).exists():
             return Response({"error": "Это username уже занято"},
                             status=status.HTTP_400_BAD_REQUEST)
 
