@@ -17,11 +17,15 @@ class UserTokenSerializer(serializers.Serializer):
 
 
 class SignUpSerializer(serializers.Serializer):
-    password = serializers.CharField(write_only=True, min_length=8, required=False)
-    email = serializers.EmailField(min_length=6, max_length=254, required=True)
+    password = serializers.CharField(
+        write_only=True, min_length=8, required=False)
+    email = serializers.EmailField(
+        min_length=6, max_length=254, required=True)
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
-        message="Никнейм содержит недопустимы символы!"
+        message="Можно использовать только буквы "
+                "(включая буквы в верхнем и нижнем регистрах), "
+                "цифры и спецсимволы: ., @, +, - "
     )
     username = serializers.CharField(min_length=4, max_length=150,
                                      validators=[username_validator])
@@ -30,38 +34,35 @@ class SignUpSerializer(serializers.Serializer):
         max_length=150,
         required=False,
     )
-    last_name = serializers.CharField(min_length=4, max_length=150, required=False)
+    last_name = serializers.CharField(
+        min_length=4, max_length=150, required=False)
     bio = serializers.CharField(required=False)
 
     def validate_username(self, value):
         if value.lower() == "me":
-            raise serializers.ValidationError("Недопустимое имя пользователя")
+            raise serializers.ValidationError(
+                "Недопустимое имя для пользователя: me"
+            )
         return value
 
     def validate(self, data):
         email = data.get("email")
         username = data.get("username")
 
-        # Проверяем наличие пользователя по email
         user_by_email = User.objects.filter(email=email).first()
-        # Проверяем наличие пользователя по username
         user_by_username = User.objects.filter(username=username).first()
 
-        # Если email и username принадлежат одному пользователю
         if user_by_email and user_by_email == user_by_username:
             return data
 
-        # Если email и username принадлежат разным пользователям
         if user_by_email and user_by_username:
             raise serializers.ValidationError(
-                {"email": "Email уже занят.", "username": "Username уже занят."}
+                {"email": "Email уже занят.", "username": "Username уже занят."},
             )
 
-        # Если email занят, но username другой
         if user_by_email:
             raise serializers.ValidationError({"email": "Email уже занят."})
 
-        # Если username занят, но email другой
         if user_by_username:
             raise serializers.ValidationError({"username": "Username уже занят."})
 
@@ -71,15 +72,17 @@ class SignUpSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
-        message="Никнейм содержит недопустимы символы!"
+        message="Можно использовать только буквы "
+                "(включая буквы в верхнем и нижнем регистрах), "
+                "цифры и спецсимволы: ., @, +, - "
     )
     username = serializers.CharField(
         min_length=4,
         max_length=150,
         validators=[
             username_validator,
-            UniqueValidator(queryset=User.objects.all())
-        ]
+            UniqueValidator(queryset=User.objects.all()),
+        ],
     )
 
     class Meta:

@@ -71,8 +71,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('pub_date',)
 
     def validate(self, data):
-        # Проверка на дублирование отзывов от одного пользователя
-        # на одно произведение
         title_id = self.context.get('view').kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
         if self.context['request'].method == 'POST':
