@@ -47,6 +47,11 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
                 'Год не может быть больше текущего!')
         return value
 
+    def validate_genre(self, value):
+        if not value:
+            raise serializers.ValidationError('Список жанров не может быть пустым!')
+        return value
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
