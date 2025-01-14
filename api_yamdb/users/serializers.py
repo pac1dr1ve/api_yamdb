@@ -23,7 +23,9 @@ class SignUpSerializer(serializers.Serializer):
         min_length=6, max_length=254, required=True)
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
-        message="Никнейм содержит недопустимы символы!",
+        message="Можно использовать только буквы "
+                "(включая буквы в верхнем и нижнем регистрах), "
+                "цифры и спецсимволы: ., @, +, - "
     )
     username = serializers.CharField(min_length=4, max_length=150,
                                      validators=[username_validator])
@@ -38,7 +40,9 @@ class SignUpSerializer(serializers.Serializer):
 
     def validate_username(self, value):
         if value.lower() == "me":
-            raise serializers.ValidationError("Недопустимое имя пользователя")
+            raise serializers.ValidationError(
+                "Недопустимое имя для пользователя: me"
+            )
         return value
 
     def validate(self, data):
@@ -73,7 +77,9 @@ class SignUpSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     username_validator = RegexValidator(
         r"^[\w.@+-]+\Z",
-        message="Никнейм содержит недопустимы символы!",
+        message="Можно использовать только буквы "
+                "(включая буквы в верхнем и нижнем регистрах), "
+                "цифры и спецсимволы: ., @, +, - "
     )
     username = serializers.CharField(
         min_length=4,

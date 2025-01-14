@@ -62,6 +62,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
+    ordering = ('id',)
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):

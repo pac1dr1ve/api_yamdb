@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -39,6 +40,17 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = '__all__'
+
+    def validate_year(self, value):
+        if value > datetime.now().year:
+            raise serializers.ValidationError(
+                'Год не может быть больше текущего!')
+        return value
+
+    def validate_genre(self, value):
+        if not value:
+            raise serializers.ValidationError('Список жанров не может быть пустым!')
+        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
