@@ -49,7 +49,8 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
 
     def validate_genre(self, value):
         if not value:
-            raise serializers.ValidationError('Список жанров не может быть пустым!')
+            raise serializers.ValidationError(
+                'Список жанров не может быть пустым!')
         return value
 
 
