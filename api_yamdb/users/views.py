@@ -117,7 +117,7 @@ class UserMeView(generics.RetrieveUpdateAPIView):
 
         if username and User.objects.filter(
                 username=username).exclude(
-            pk=request.user.pk).exists():
+                pk=request.user.pk).exists():
             return Response({"error": "Это username уже занято"},
                             status=status.HTTP_400_BAD_REQUEST)
 

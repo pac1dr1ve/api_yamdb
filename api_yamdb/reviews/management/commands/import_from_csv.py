@@ -14,7 +14,8 @@ class Command(BaseCommand):
         data_dir = os.path.join(base_dir, 'data')
 
         if not os.path.exists(data_dir):
-            self.stdout.write(self.style.ERROR(f'Папка с данными не найдена: {data_dir}'))
+            self.stdout.write(self.style.ERROR(
+                f'Папка с данными не найдена: {data_dir}'))
             return
 
         file_to_model = {
@@ -30,7 +31,8 @@ class Command(BaseCommand):
         for file, model in file_to_model.items():
             file_path = os.path.join(data_dir, file)
             if not os.path.exists(file_path):
-                self.stdout.write(self.style.WARNING(f'Файл {file} не найден, продолжаем'))
+                self.stdout.write(self.style.WARNING(
+                    f'Файл {file} не найден, продолжаем'))
                 continue
             self.stdout.write(self.style.SUCCESS(f'Файл {file} загружен.'))
 
@@ -39,60 +41,71 @@ class Command(BaseCommand):
                 objects = []
 
                 for row in reader:
-                    if model == Category:
-                        objects.append(Category(
-                            id=row['id'],
-                            name=row['name'],
-                            slug=row['slug']
-                        ))
-                    if model == Comment:
-                        objects.append(Comment(
-                            id=row['id'],
-                            review_id=row['review_id'],
-                            text=row['text'],
-                            author=User.objects.get(id=row['author']),
-                            pub_date=row['pub_date']
-                        ))
-                    if model == Title:
-                        objects.append(Title(
-                            id=row['id'],
-                            name=row['name'],
-                            year=row['year'],
-                            category=Category.objects.get(id=row['category'])
-                        ))
-                    if model == Genre:
-                        objects.append(Genre(
-                            id=row['id'],
-                            name=row['name'],
-                            slug=row['slug']
-                        ))
-                    if model == GenreTitle:
-                        objects.append(GenreTitle(
-                            id=row['id'],
-                            title_id=row['title_id'],
-                            genre_id=row['genre_id']
-                        ))
-                    if model == Review:
-                        objects.append(Review(
-                            id=row['id'],
-                            title_id=row['title_id'],
-                            text=row['text'],
-                            author=User.objects.get(id=row['author']),
-                            score=row['score'],
-                            pub_date=row['pub_date']
-                        ))
-                    if model == User:
-                        objects.append(User(
-                            id=row['id'],
-                            username=row['username'],
-                            email=row['email'],
-                            role=row['role'],
-                            bio=row['bio'],
-                            first_name=row['first_name'],
-                            last_name=row['last_name']
-                        ))
+                    objects.extend(self.create_objects(model, row))
 
-                model.objects.bulk_create(objects, ignore_conflicts=True)
-                self.stdout.write(self.style.SUCCESS(f'Данные из {file} успешно загружены.'))
+                model.objects.bulk_create(objects)
+                self.stdout.write(self.style.SUCCESS(
+                    f'Данные из {file} успешно загружены.'))
 
-        self.stdout.write(self.style.SUCCESS('Загрузка данных завершена успешно.'))
+        self.stdout.write(self.style.SUCCESS(
+            'Загрузка данных завершена успешно.'))
+
+    def create_objects(self, model, row):
+        objects = []
+        if model == Category and not Category.objects.filter(
+                id=row['id']).exists():
+            objects.append(Category(
+                id=row['id'],
+                name=row['name'],
+                slug=row['slug']
+            ))
+        if model == Comment and not Comment.objects.filter(
+                id=row['id']).exists():
+            objects.append(Comment(
+                id=row['id'],
+                review_id=row['review_id'],
+                text=row['text'],
+                author=User.objects.get(id=row['author']),
+                pub_date=row['pub_date']
+            ))
+        if model == Title and not Title.objects.filter(id=row['id']).exists():
+            objects.append(Title(
+                id=row['id'],
+                name=row['name'],
+                year=row['year'],
+                category=Category.objects.get(id=row['category'])
+            ))
+        if model == Genre and not Genre.objects.filter(id=row['id']).exists():
+            objects.append(Genre(
+                id=row['id'],
+                name=row['name'],
+                slug=row['slug']
+            ))
+        if model == GenreTitle and not GenreTitle.objects.filter(
+                id=row['id']).exists():
+            objects.append(GenreTitle(
+                id=row['id'],
+                title_id=row['title_id'],
+                genre_id=row['genre_id']
+            ))
+        if model == Review and not Review.objects.filter(
+                id=row['id']).exists():
+            objects.append(Review(
+                id=row['id'],
+                title_id=row['title_id'],
+                text=row['text'],
+                author=User.objects.get(id=row['author']),
+                score=row['score'],
+                pub_date=row['pub_date']
+            ))
+        if model == User and not User.objects.filter(id=row['id']).exists():
+            objects.append(User(
+                id=row['id'],
+                username=row['username'],
+                email=row['email'],
+                role=row['role'],
+                bio=row['bio'],
+                first_name=row['first_name'],
+                last_name=row['last_name']
+            ))
+        return objects
