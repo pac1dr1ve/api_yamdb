@@ -1,5 +1,6 @@
 import os
 import csv
+from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
@@ -19,13 +20,13 @@ class Command(BaseCommand):
             return
 
         file_to_model = {
+            'users.csv': User,
             'category.csv': Category,
-            'comments.csv': Comment,
-            'titles.csv': Title,
             'genre.csv': Genre,
+            'titles.csv': Title,
             'genre_title.csv': GenreTitle,
             'review.csv': Review,
-            'users.csv': User,
+            'comments.csv': Comment,
         }
 
         for file, model in file_to_model.items():
@@ -52,6 +53,16 @@ class Command(BaseCommand):
 
     def create_objects(self, model, row):
         objects = []
+        if model == User and not User.objects.filter(id=row['id']).exists():
+            objects.append(User(
+                id=row['id'],
+                username=row['username'],
+                email=row['email'],
+                role=row['role'],
+                bio=row['bio'],
+                first_name=row['first_name'],
+                last_name=row['last_name']
+            ))
         if model == Category and not Category.objects.filter(
                 id=row['id']).exists():
             objects.append(Category(
@@ -59,14 +70,11 @@ class Command(BaseCommand):
                 name=row['name'],
                 slug=row['slug']
             ))
-        if model == Comment and not Comment.objects.filter(
-                id=row['id']).exists():
-            objects.append(Comment(
+        if model == Genre and not Genre.objects.filter(id=row['id']).exists():
+            objects.append(Genre(
                 id=row['id'],
-                review_id=row['review_id'],
-                text=row['text'],
-                author=User.objects.get(id=row['author']),
-                pub_date=row['pub_date']
+                name=row['name'],
+                slug=row['slug']
             ))
         if model == Title and not Title.objects.filter(id=row['id']).exists():
             objects.append(Title(
@@ -74,12 +82,6 @@ class Command(BaseCommand):
                 name=row['name'],
                 year=row['year'],
                 category=Category.objects.get(id=row['category'])
-            ))
-        if model == Genre and not Genre.objects.filter(id=row['id']).exists():
-            objects.append(Genre(
-                id=row['id'],
-                name=row['name'],
-                slug=row['slug']
             ))
         if model == GenreTitle and not GenreTitle.objects.filter(
                 id=row['id']).exists():
@@ -96,16 +98,15 @@ class Command(BaseCommand):
                 text=row['text'],
                 author=User.objects.get(id=row['author']),
                 score=row['score'],
-                pub_date=row['pub_date']
+                pub_date=datetime.strptime(row['pub_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
             ))
-        if model == User and not User.objects.filter(id=row['id']).exists():
-            objects.append(User(
+        if model == Comment and not Comment.objects.filter(
+                id=row['id']).exists():
+            objects.append(Comment(
                 id=row['id'],
-                username=row['username'],
-                email=row['email'],
-                role=row['role'],
-                bio=row['bio'],
-                first_name=row['first_name'],
-                last_name=row['last_name']
+                review_id=row['review_id'],
+                text=row['text'],
+                author=User.objects.get(id=row['author']),
+                pub_date=row['pub_date']
             ))
         return objects
