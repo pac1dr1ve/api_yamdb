@@ -23,7 +23,7 @@ class User(AbstractUser):
                                   max_length=150, blank=True)
     last_name = models.CharField(_("last name"),
                                  max_length=150, blank=True)
-    bio = models.TextField(_("bio"), blank=True)
+    bio = models.TextField(_("Биография"), blank=True)
     role = models.CharField(
         max_length=20,
         choices=[(role.value, role.name) for role in Role],
@@ -40,3 +40,7 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['id']
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username

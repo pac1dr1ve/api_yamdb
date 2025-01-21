@@ -126,10 +126,8 @@ class UserMeView(generics.RetrieveUpdateAPIView):
 
         if serializer.is_valid():
             if ("role" in request.data
-                    and request.data["role"] != request.user.role):
-                return Response({"error": "Изменение роли "
-                                          "для пользователя недопустимо!"},
-                                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+                    != request.user.role):
+                return Response(status=status.HTTP_200_OK)
 
             serializer.save()
 
