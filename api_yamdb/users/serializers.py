@@ -85,6 +85,23 @@ class UserSerializer(serializers.ModelSerializer):
         ],
     )
 
+    def validate_username(self, value):
+        if self.instance and User.objects.filter(
+                username=value).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError(
+                "Пользователь с таким именем уже существует"
+            )
+        return value
+
+    def update(self, instance, validated_data):
+        new_role = validated_data.get("role")
+        if (new_role and new_role != instance.role
+                and self.context["request"].user.role == "admin"):
+            instance.role = new_role
+        if "role" in validated_data:
+            del validated_data["role"]
+        return super().update(instance, validated_data)
+
     class Meta:
         model = User
         fields = ("first_name", "last_name", "username",
