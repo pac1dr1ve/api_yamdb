@@ -98,7 +98,8 @@ class Command(BaseCommand):
                 text=row['text'],
                 author=User.objects.get(id=row['author']),
                 score=row['score'],
-                pub_date=datetime.strptime(row['pub_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                pub_date=datetime.strptime(row['pub_date'],
+                                           '%Y-%m-%dT%H:%M:%S.%fZ')
             ))
         if model == Comment and not Comment.objects.filter(
                 id=row['id']).exists():

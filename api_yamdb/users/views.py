@@ -118,7 +118,8 @@ class UserMeView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def patch(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+        serializer = self.get_serializer(self.get_object(),
+                                         data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
