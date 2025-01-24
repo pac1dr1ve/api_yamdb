@@ -118,29 +118,10 @@ class UserMeView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def patch(self, request, *args, **kwargs):
-        username = request.data.get("username", None)
-
-        if username and User.objects.filter(
-                username=username).exclude(
-                pk=request.user.pk).exists():
-            return Response({"error": "Это username уже занято"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = UserSerializer(request.user,
-                                    data=request.data, partial=True)
-
-        if serializer.is_valid():
-            if ("role" in request.data
-                    and request.data["role"] != request.user.role):
-                return Response({"error": "Изменение роли "
-                                          "для пользователя недопустимо!"},
-                                status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-            serializer.save()
-
-            return Response(serializer.data)
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
