@@ -1,6 +1,8 @@
 from datetime import datetime
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -49,7 +51,8 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
 
     def validate_genre(self, value):
         if not value:
-            raise serializers.ValidationError('Список жанров не может быть пустым!')
+            raise serializers.ValidationError(
+                'Список жанров не может быть пустым!')
         return value
 
 

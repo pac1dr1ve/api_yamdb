@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -72,6 +75,12 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.year > datetime.now().year:
+            raise ValidationError(
+                'Год выпуска не может быть больше текущего года!')
+        return super().clean()
 
 
 class GenreTitle(models.Model):
