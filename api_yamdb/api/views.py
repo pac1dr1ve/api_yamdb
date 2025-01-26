@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, mixins, filters
 from rest_framework.response import Response
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
@@ -10,7 +10,6 @@ from rest_framework.pagination import (LimitOffsetPagination,
 from reviews.models import Category, Genre, Title, Review
 
 from .filters import TitleFilter
-from .mixins import CategoryAndGenreMixin
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
 from .serializers import (
     CategorySerializer,
@@ -22,7 +21,16 @@ from .serializers import (
 )
 
 
-class CategoryViewSet(CategoryAndGenreMixin):
+class CategoryAndGenreViewSet(mixins.CreateModelMixin,
+                              mixins.ListModelMixin,
+                              mixins.DestroyModelMixin,
+                              viewsets.GenericViewSet):
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (IsAdminOrReadOnly,)
+
+
+class CategoryViewSet(CategoryAndGenreViewSet):
     queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     lookup_field = 'slug'
@@ -37,7 +45,7 @@ class CategoryViewSet(CategoryAndGenreMixin):
         instance.delete()
 
 
-class GenreViewSet(CategoryAndGenreMixin):
+class GenreViewSet(CategoryAndGenreViewSet):
     queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     lookup_field = 'slug'
