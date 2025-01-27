@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -25,7 +22,8 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('reviews', 'id', 'name', 'year', 'description',
+                  'category', 'genre', 'rating')
 
 
 class TitleSerializerForWrite(serializers.ModelSerializer):
@@ -41,19 +39,23 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
-
-    def validate_year(self, value):
-        if value > datetime.now().year:
-            raise serializers.ValidationError(
-                'Год не может быть больше текущего!')
-        return value
+        fields = ('reviews', 'id', 'name', 'year',
+                  'description', 'category', 'genre')
 
     def validate_genre(self, value):
         if not value:
             raise serializers.ValidationError(
                 'Список жанров не может быть пустым!')
         return value
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.category:
+            representation['category'] = instance.category.slug
+        elif instance.genre:
+            representation['genre'] = [genre.slug for genre in
+                                       instance.genre.all()]
+        return representation
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -63,7 +65,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'pub_date', 'review')
         read_only_fields = ('pub_date',)
 
 
@@ -74,24 +76,20 @@ class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
-        fields = '__all__'
+        fields = ('comments', 'id', 'text', 'author',
+                  'pub_date', 'title', 'score')
         model = Review
         read_only_fields = ('pub_date',)
 
     def validate(self, data):
         title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
         if self.context['request'].method == 'POST':
-            try:
-                Review.objects.get(
-                    title=title,
-                    author=self.context['request'].user
-                )
+            if Review.objects.filter(
+                title_id=title_id,
+                    author=self.context['request'].user).exists():
                 raise serializers.ValidationError(
                     'Пользователь уже оставил отзыв на это произведение.'
                 )
-            except Review.DoesNotExist:
-                pass
 
         if not 1 <= data['score'] <= 10:
             raise serializers.ValidationError(
