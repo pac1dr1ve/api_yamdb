@@ -28,36 +28,18 @@ class CategoryAndGenreViewSet(mixins.CreateModelMixin,
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
+    pagination_class = PageNumberPagination
 
 
 class CategoryViewSet(CategoryAndGenreViewSet):
     queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
-    lookup_field = 'slug'
-    pagination_class = PageNumberPagination
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
 
 class GenreViewSet(CategoryAndGenreViewSet):
     queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
-    lookup_field = 'slug'
-    pagination_class = PageNumberPagination
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -67,11 +49,12 @@ class TitleViewSet(viewsets.ModelViewSet):
         .order_by('name')
     )
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
     ordering = ('id',)
+    ordering_fields = ('name', 'year')
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
@@ -108,7 +91,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):
-        return get_object_or_404(Review, pk=self.kwargs['review_id'])
+        return get_object_or_404(
+            Review,
+            pk=self.kwargs['review_id'],
+            title_id=self.kwargs['title_id']
+        )
 
     def get_queryset(self):
         return self.get_review().comments.all()
