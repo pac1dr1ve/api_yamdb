@@ -10,8 +10,8 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.models import Role, User
-from users.permissions import CustomIsAdminUserOrSuperuser
+from users.models import User
+from users.permissions import IsAdminUserOrSuperuser
 from users.serializers import (
     SignUpSerializer,
     UserSerializer,
@@ -63,12 +63,22 @@ class SignUpView(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = User.objects.create_user(
-            username=username, email=email,
-            role=Role.USER.value,
-        )
-        user.confirmation_code = confirmation_code
-        user.save()
+        # user = User.objects.create_user(
+        #     username=username, email=email,
+        #     role=Role.USER.value,
+        # )
+        try:
+            user = User(**serializer.validated_data)
+            user.password = "qwerty"  # TODO Потом нужно сгенерировать пароль
+            user.confirmation_code = confirmation_code
+            user.full_clean()
+            user.save()
+
+        except ValueError as e:
+            return Response(
+                {"detail": e},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         self.send_confirmation_email(user, confirmation_code)
 
@@ -135,7 +145,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["destroy", "retrieve",
                            "partial_update", "create", "list"]:
-            self.permission_classes = [CustomIsAdminUserOrSuperuser]
+            self.permission_classes = [IsAdminUserOrSuperuser]
         else:
             self.permission_classes = [permissions.IsAuthenticated]
         return super().get_permissions()

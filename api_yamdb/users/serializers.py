@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from users.models import User
 
@@ -21,12 +20,12 @@ class SignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(
         min_length=6, max_length=254, required=True)
     # username_validator = RegexValidator(
-    #     r"^[\w.@+-]+\Z",
+    #     r"^[\w.@+-]+\$",
     #     message="Можно использовать только буквы "
     #             "(включая буквы в верхнем и нижнем регистрах), "
     #             "цифры и спецсимволы: ., @, +, - "
     # )
-    username = serializers.CharField(max_length=150,)
+    username = serializers.CharField(max_length=150, )
     first_name = serializers.CharField(
         min_length=4,
         max_length=150,
@@ -79,15 +78,14 @@ class UserSerializer(serializers.ModelSerializer):
     #             "(включая буквы в верхнем и нижнем регистрах), "
     #             "цифры и спецсимволы: ., @, +, - "
     # )
-    username = serializers.CharField(
-        min_length=4,
-        max_length=150,
-        validators=[
-            # username_validator,
-            UniqueValidator(queryset=User.objects.all()),
-        ],
-    )
-
+    # username = serializers.CharField(
+    #     min_length=4,
+    #     max_length=150,
+    #     validators=[
+    #         username_validator,
+    #         UniqueValidator(queryset=User.objects.all()),
+    #     ],
+    # )
 
     def validate_username(self, value):
         if self.instance and User.objects.filter(
@@ -110,8 +108,3 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("first_name", "last_name", "username",
                   "bio", "email", "role")
-
-
-class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True)

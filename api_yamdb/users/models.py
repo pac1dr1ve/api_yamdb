@@ -11,9 +11,6 @@ class Role(Enum):
     MODERATOR = "moderator"
     ADMIN = "admin"
 
-def test_validate(value):
-    print(f"{value=}")
-
 
 class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
@@ -21,16 +18,12 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
-        validators=
-        [
-            # RegexValidator(
-            #     regex=r'^[\w.@+-]+$',  # Убрал \Z, заменил на $
-            #     message="Можно использовать только буквы, цифры и спецсимволы: ., @, +, -",
-            #     code='invalid_username'
-            # ),
-        test_validate
-
-        ]
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message="Можно использовать только буквы, цифры и спецсимволы: ., @, +, -",
+                code='invalid_username'
+            ), ]
     )
     first_name = models.CharField(_("first name"),
                                   max_length=150, blank=True)
@@ -54,13 +47,6 @@ class User(AbstractUser):
     class Meta:
         ordering = ['id']
         verbose_name_plural = 'Пользователи'
-
-        # constraints = [
-        #     models.CheckConstraint(
-        #         check=models.Q(username__regex=r'^[\w.@+-]+$'),
-        #         name='valid_username'
-        #     )
-        # ]
 
     def __str__(self):
         return self.username
