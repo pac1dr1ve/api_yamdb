@@ -150,17 +150,6 @@ class UserViewSet(viewsets.ModelViewSet):
             self.permission_classes = [permissions.IsAuthenticated]
         return super().get_permissions()
 
-    def check_password(self, user, old_password):
-        """Проверка пароля на корректность."""
-        if not user.check_password(old_password):
-            return False
-        return True
-
-    def update_password(self, user, new_password):
-        """Обновление пароля пользователя."""
-        user.set_password(new_password)
-        user.save()
-
     def partial_update(self, request, *args, **kwargs):
         user = self.get_object()
         serializer = self.get_serializer(user,

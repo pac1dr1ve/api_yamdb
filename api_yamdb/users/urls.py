@@ -12,14 +12,9 @@ v1_router = DefaultRouter()
 v1_router.register(r"users", UserViewSet, basename="user")
 
 urlpatterns = [
-    path("v1/", include(v1_router.urls)),
-    path("users/me/", UserMeView.as_view(), name="users_me"),
-]
-
-urlpatterns_auth = [
+    path("api/v1/", include(v1_router.urls)),
     path("auth/signup/",
          SignUpView.as_view({"post": "create"}), name="signup"),
     path("auth/token/", CustomTokenObtainPairView.as_view(), name="token"),
+    path("users/me/", UserMeView.as_view(), name="users_me"),
 ]
-
-# urlpatterns += urlpatterns_auth
