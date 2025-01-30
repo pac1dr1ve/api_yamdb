@@ -52,7 +52,7 @@ class User(AbstractUser):
         _("Биография"), blank=True)
     role = models.CharField(
         _("Роль"),
-        max_length=20,
+        max_length=max(len(role.value) for role in Role),
         choices=[(role.value, role.name) for role in Role],
         default=Role.USER.value,
     )
