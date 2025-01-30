@@ -9,6 +9,7 @@ from reviews.constants import (
     MAX_EMAIL_STRING,
     MAX_CONFORMATION_CODE_STRING,
     MAX_NAMES_STRINGS)
+from .mixin import UsernameValidationMixin
 
 
 class Role(Enum):
@@ -21,7 +22,7 @@ class Role(Enum):
         return self.USER
 
 
-class User(AbstractUser):
+class User(AbstractUser, UsernameValidationMixin):
     email = models.EmailField(
         _("email address"), unique=True,
         max_length=MAX_EMAIL_STRING)

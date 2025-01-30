@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User
+from .mixin import UsernameValidationMixin
 
 
 class UserTokenSerializer(serializers.Serializer):
@@ -14,7 +15,7 @@ class UserTokenSerializer(serializers.Serializer):
         return data
 
 
-class SignUpSerializer(serializers.Serializer):
+class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
     password = serializers.CharField(
         write_only=True, min_length=8, required=False)
     email = serializers.EmailField(
