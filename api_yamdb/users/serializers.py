@@ -87,6 +87,11 @@ class UserSerializer(serializers.ModelSerializer):
     #     ],
     # )
 
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "username",
+                  "bio", "email", "role")
+
     def validate_username(self, value):
         if self.instance and User.objects.filter(
                 username=value).exclude(pk=self.instance.pk).exists():
@@ -103,8 +108,3 @@ class UserSerializer(serializers.ModelSerializer):
         if "role" in validated_data:
             del validated_data["role"]
         return super().update(instance, validated_data)
-
-    class Meta:
-        model = User
-        fields = ("first_name", "last_name", "username",
-                  "bio", "email", "role")
