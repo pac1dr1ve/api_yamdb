@@ -1,8 +1,7 @@
-from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from users.models import User
+from .mixin import UsernameValidationMixin
 
 
 class UserTokenSerializer(serializers.Serializer):
@@ -16,19 +15,18 @@ class UserTokenSerializer(serializers.Serializer):
         return data
 
 
-class SignUpSerializer(serializers.Serializer):
+class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
     password = serializers.CharField(
         write_only=True, min_length=8, required=False)
     email = serializers.EmailField(
         min_length=6, max_length=254, required=True)
-    username_validator = RegexValidator(
-        r"^[\w.@+-]+\Z",
-        message="Можно использовать только буквы "
-                "(включая буквы в верхнем и нижнем регистрах), "
-                "цифры и спецсимволы: ., @, +, - "
-    )
-    username = serializers.CharField(min_length=4, max_length=150,
-                                     validators=[username_validator])
+    # username_validator = RegexValidator(
+    #     r"^[\w.@+-]+\$",
+    #     message="Можно использовать только буквы "
+    #             "(включая буквы в верхнем и нижнем регистрах), "
+    #             "цифры и спецсимволы: ., @, +, - "
+    # )
+    username = serializers.CharField(max_length=150, )
     first_name = serializers.CharField(
         min_length=4,
         max_length=150,
@@ -75,20 +73,25 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username_validator = RegexValidator(
-        r"^[\w.@+-]+\Z",
-        message="Можно использовать только буквы "
-                "(включая буквы в верхнем и нижнем регистрах), "
-                "цифры и спецсимволы: ., @, +, - "
-    )
-    username = serializers.CharField(
-        min_length=4,
-        max_length=150,
-        validators=[
-            username_validator,
-            UniqueValidator(queryset=User.objects.all()),
-        ],
-    )
+    # username_validator = RegexValidator(
+    #     r"^[\w.@+-]+\Z",
+    #     message="Можно использовать только буквы "
+    #             "(включая буквы в верхнем и нижнем регистрах), "
+    #             "цифры и спецсимволы: ., @, +, - "
+    # )
+    # username = serializers.CharField(
+    #     min_length=4,
+    #     max_length=150,
+    #     validators=[
+    #         username_validator,
+    #         UniqueValidator(queryset=User.objects.all()),
+    #     ],
+    # )
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "username",
+                  "bio", "email", "role")
 
     def validate_username(self, value):
         if self.instance and User.objects.filter(
@@ -106,13 +109,3 @@ class UserSerializer(serializers.ModelSerializer):
         if "role" in validated_data:
             del validated_data["role"]
         return super().update(instance, validated_data)
-
-    class Meta:
-        model = User
-        fields = ("first_name", "last_name", "username",
-                  "bio", "email", "role")
-
-
-class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True)

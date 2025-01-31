@@ -1,8 +1,15 @@
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from reviews.constants import (
+    MAX_EMAIL_STRING,
+    MAX_CONFORMATION_CODE_STRING,
+    MAX_NAMES_STRINGS)
+from .mixin import UsernameValidationMixin
 
 
 class Role(Enum):
@@ -10,25 +17,51 @@ class Role(Enum):
     MODERATOR = "moderator"
     ADMIN = "admin"
 
+    # Две ниже строки не уверен, что требуются
+    def __str__(self):
+        return self.USER
 
-class User(AbstractUser):
-    email = models.EmailField(_("email address"), unique=True)
-    confirmation_code = models.CharField(max_length=5, blank=True)
+
+class User(AbstractUser, UsernameValidationMixin):
+    email = models.EmailField(
+        _("email address"), unique=True,
+        max_length=MAX_EMAIL_STRING)
+    confirmation_code = models.CharField(
+        _("Код подтверждения"),
+        max_length=MAX_CONFORMATION_CODE_STRING,
+        blank=True)
     username = models.CharField(
-        _("username"),
-        max_length=150,
+        _("Никнейм"),
+        max_length=MAX_NAMES_STRINGS,
         unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message="Можно использовать только буквы, "
+                        "цифры и спецсимволы: ., @, +, -",
+                code='invalid_username'
+            ),
+        ],
     )
-    first_name = models.CharField(_("first name"),
-                                  max_length=150, blank=True)
-    last_name = models.CharField(_("last name"),
-                                 max_length=150, blank=True)
-    bio = models.TextField(_("Биография"), blank=True)
+    first_name = models.CharField(
+        _("Имя"),
+        max_length=MAX_NAMES_STRINGS, blank=True)
+    last_name = models.CharField(
+        _("Фамилия"),
+        max_length=MAX_NAMES_STRINGS, blank=True)
+    bio = models.TextField(
+        _("Биография"), blank=True)
     role = models.CharField(
-        max_length=20,
+        _("Роль"),
+        max_length=max(len(role.value) for role in Role),
         choices=[(role.value, role.name) for role in Role],
         default=Role.USER.value,
     )
+
+    class Meta:
+        ordering = ["username", "role"]
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
     @property
     def is_admin(self):
@@ -36,11 +69,7 @@ class User(AbstractUser):
 
     @property
     def is_moderator(self):
-        return self.role == Role.MODERATOR.value or self.is_superuser
-
-    class Meta:
-        ordering = ['id']
-        verbose_name_plural = 'Пользователи'
+        return self.role == Role.MODERATOR.value
 
     def __str__(self):
         return self.username
