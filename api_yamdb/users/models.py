@@ -21,7 +21,7 @@ class Role(Enum):
         return self.USER
 
 
-class User(AbstractUser):
+class User( ):
     email = models.EmailField(
         _("email address"), unique=True,
         max_length=MAX_EMAIL_STRING)
