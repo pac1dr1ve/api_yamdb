@@ -9,6 +9,7 @@ from reviews.constants import (
     MAX_EMAIL_STRING,
     MAX_CONFORMATION_CODE_STRING,
     MAX_NAMES_STRINGS)
+from .mixin import UsernameValidationMixin
 
 
 class Role(Enum):
@@ -17,11 +18,11 @@ class Role(Enum):
     ADMIN = "admin"
 
     # Две ниже строки не уверен, что требуются
-    def __str__(self):
-        return self.USER
+    # def __str__(self):
+    #     return self.USER
 
 
-class User( ):
+class User(AbstractUser, UsernameValidationMixin):
     email = models.EmailField(
         _("email address"), unique=True,
         max_length=MAX_EMAIL_STRING)
@@ -35,10 +36,11 @@ class User( ):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message="Можно использовать только буквы, "
-                        "цифры и спецсимволы: ., @, +, -",
-                code='invalid_username'
+                regex=r"^[\w.@+_-]+\Z",
+                message="Можно использовать только буквы "
+                        "(включая буквы в верхнем и нижнем регистрах), "
+                        "цифры и спецсимволы: ., @, +, - ",
+                code="invalid_username"
             ),
         ],
     )
@@ -52,7 +54,7 @@ class User( ):
         _("Биография"), blank=True)
     role = models.CharField(
         _("Роль"),
-        max_length=20,
+        max_length=max(len(role.value) for role in Role),
         choices=[(role.value, role.name) for role in Role],
         default=Role.USER.value,
     )
@@ -69,6 +71,3 @@ class User( ):
     @property
     def is_moderator(self):
         return self.role == Role.MODERATOR.value
-
-    def __str__(self):
-        return self.username
