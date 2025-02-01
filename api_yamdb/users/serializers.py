@@ -1,15 +1,19 @@
 from django.core.validators import RegexValidator
 from rest_framework import serializers
 
-from reviews.constants import MAX_NAMES_STRINGS, MAX_EMAIL_STRING
+from reviews.constants import (
+    MAX_NAMES_STRINGS, MAX_EMAIL_STRING,
+    MAX_CONFORMATION_CODE_STRING)
 from users.common import UserService
 from users.mixin import UsernameValidationMixin
 from users.models import User
 
 
 class UserTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=5)
+    username = serializers.CharField(
+        max_length=MAX_NAMES_STRINGS)
+    confirmation_code = serializers.CharField(
+        max_length=MAX_CONFORMATION_CODE_STRING)
 
     def validate(self, data):
         user = User.objects.get(username=data.get("username"))

@@ -3,12 +3,15 @@ import string
 
 from django.core.mail import send_mail
 
+from reviews.constants import MAX_CONFORMATION_CODE_STRING
+
 
 class UserService:
     @staticmethod
     def create_confirmation_code():
         confirmation_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=5),
+            random.choices(string.ascii_uppercase + string.digits,
+                           k=MAX_CONFORMATION_CODE_STRING),
         )
         return confirmation_code
 

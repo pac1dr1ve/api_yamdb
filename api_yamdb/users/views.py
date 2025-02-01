@@ -1,11 +1,10 @@
 from rest_framework import (
     filters,
-    generics,
     permissions,
     status,
     viewsets,
 )
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -22,7 +21,7 @@ from users.serializers import (
 )
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def sign_up_view(request):
     if request.method == 'POST':
@@ -32,35 +31,31 @@ def sign_up_view(request):
         return Response(validated_data, status=status.HTTP_200_OK)
 
 
-class UserMeView(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated,)
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    def get_object(self):
-        return self.request.user
-
-
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-    lookup_field = "username"
-    search_fields = ("username",)
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
+    permission_classes = [IsAdminUserOrSuperuser]
 
-    def get_permissions(self):
-        if self.action in [
-            "destroy",
-            "retrieve",
-            "partial_update",
-            "create",
-            "list",
-        ]:
-            self.permission_classes = [IsAdminUserOrSuperuser]
-        else:
-            self.permission_classes = [permissions.IsAuthenticated]
-        return super().get_permissions()
+    @action(
+        detail=False,
+        methods=["get", "patch"],
+        url_path="me",
+        permission_classes=[IsAuthenticated]
+    )
+    def me(self, request):
+        user = request.user
+
+        if request.method == "GET":
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif request.method == "PATCH":
+            serializer = self.get_serializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
