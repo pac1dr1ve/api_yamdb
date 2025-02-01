@@ -1,40 +1,56 @@
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from reviews.constants import (
-    MAX_NAMES_STRINGS, MAX_EMAIL_STRING,
-    MAX_CONFORMATION_CODE_STRING)
+    MAX_NAMES_STRINGS,
+    MAX_EMAIL_STRING,
+    MAX_CONFORMATION_CODE_STRING,
+)
 from users.common import UserService
 from users.mixin import UsernameValidationMixin
 from users.models import User
 
 
 class UserTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        max_length=MAX_NAMES_STRINGS)
+    username = serializers.CharField(max_length=MAX_NAMES_STRINGS)
     confirmation_code = serializers.CharField(
-        max_length=MAX_CONFORMATION_CODE_STRING)
+        max_length=MAX_CONFORMATION_CODE_STRING
+    )
 
     def validate(self, data):
-        user = User.objects.get(username=data.get("username"))
-        if user.confirmation_code != data.get("confirmation_code"):
+        username = data.get("username")
+        confirmation_code = data.get("confirmation_code")
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound("Пользователь не найден")
+
+        if user.confirmation_code != confirmation_code:
             raise serializers.ValidationError("Неверный код подтверждения")
+
         return data
 
 
 class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
-    email = serializers.EmailField(
-        max_length=MAX_EMAIL_STRING, required=True
-    )
-    username_validator = RegexValidator(
-        r"^[\w.@+_-]+\Z",
-        message=(
-            "Можно использовать только буквы (включая буквы в верхнем и "
-            "нижнем регистрах), цифры и спецсимволы: ., @, +, -"
+    email = serializers.EmailField(max_length=MAX_EMAIL_STRING, required=True)
+    username = serializers.CharField(max_length=MAX_NAMES_STRINGS)
+
+    def validate_username(self, value):
+        if value.lower() == "me":
+            raise serializers.ValidationError(
+                "Использовать 'me' в качестве username запрещено."
+            )
+        username_validator = RegexValidator(
+            r"^[\w.@+_-]+\Z",
+            message=(
+                "Можно использовать только буквы (включая буквы в верхнем и "
+                "нижнем регистрах), цифры и спецсимволы: ., @, +, -"
+            )
         )
-    )
-    username = serializers.CharField(max_length=MAX_NAMES_STRINGS,
-                                     validators=[username_validator])
+        username_validator(value)
+        return value
 
     def validate(self, data):
         email = data.get("email")

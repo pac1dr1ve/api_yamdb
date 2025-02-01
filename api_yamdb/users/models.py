@@ -4,12 +4,13 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 
 from reviews.constants import (
     MAX_EMAIL_STRING,
     MAX_CONFORMATION_CODE_STRING,
-    MAX_NAMES_STRINGS)
-from .mixin import UsernameValidationMixin
+    MAX_NAMES_STRINGS,
+)
 
 
 class Role(Enum):
@@ -17,19 +18,31 @@ class Role(Enum):
     MODERATOR = "moderator"
     ADMIN = "admin"
 
-    # Две ниже строки не уверен, что требуются
-    # def __str__(self):
-    #     return self.USER
+    def __str__(self):
+        return self.name.capitalize()
+
+
+class UsernameValidationMixin:
+    def validate_username(self, username):
+        if username.lower() == "me":
+            raise serializers.ValidationError(
+                _("Использовать 'me' в качестве username запрещено."),
+                code="invalid_username",
+            )
+        return username
 
 
 class User(AbstractUser, UsernameValidationMixin):
     email = models.EmailField(
-        _("email address"), unique=True,
-        max_length=MAX_EMAIL_STRING)
+        _("email address"),
+        unique=True,
+        max_length=MAX_EMAIL_STRING,
+    )
     confirmation_code = models.CharField(
         _("Код подтверждения"),
         max_length=MAX_CONFORMATION_CODE_STRING,
-        blank=True)
+        blank=True,
+    )
     username = models.CharField(
         _("Никнейм"),
         max_length=MAX_NAMES_STRINGS,
@@ -40,18 +53,24 @@ class User(AbstractUser, UsernameValidationMixin):
                 message="Можно использовать только буквы "
                         "(включая буквы в верхнем и нижнем регистрах), "
                         "цифры и спецсимволы: ., @, +, - ",
-                code="invalid_username"
+                code="invalid_username",
             ),
         ],
     )
     first_name = models.CharField(
         _("Имя"),
-        max_length=MAX_NAMES_STRINGS, blank=True)
+        max_length=MAX_NAMES_STRINGS,
+        blank=True,
+    )
     last_name = models.CharField(
         _("Фамилия"),
-        max_length=MAX_NAMES_STRINGS, blank=True)
+        max_length=MAX_NAMES_STRINGS,
+        blank=True,
+    )
     bio = models.TextField(
-        _("Биография"), blank=True)
+        _("Биография"),
+        blank=True,
+    )
     role = models.CharField(
         _("Роль"),
         max_length=max(len(role.value) for role in Role),
@@ -63,6 +82,13 @@ class User(AbstractUser, UsernameValidationMixin):
         ordering = ["username", "role"]
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
+
+    def __str__(self):
+        return f"{self.username} ({self.get_role_display()})"
+
+    def clean(self):
+        super().clean()
+        self.validate_username(self.username)
 
     @property
     def is_admin(self):
