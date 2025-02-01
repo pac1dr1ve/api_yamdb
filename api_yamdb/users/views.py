@@ -61,12 +61,18 @@ class UserViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_200_OK)
 
         elif request.method == "PATCH":
+            if ("username" in request.data and
+                    request.data["username"].lower() == "me"):
+                return Response(
+                    {"detail": "Использовать 'me' "
+                               "в качестве username запрещено."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             serializer = self.get_serializer(
                 user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data,
-
                             status=status.HTTP_200_OK)
 
 

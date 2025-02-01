@@ -8,7 +8,7 @@ from users.views import (
 )
 
 v1_router = DefaultRouter()
-v1_router.register(r"users", UserViewSet, basename="user")
+v1_router.register(r"users", UserViewSet, basename="users")
 
 auth_urlpatterns = [
     path("signup/", sign_up_view, name="signup"),
