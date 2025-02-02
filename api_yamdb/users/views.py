@@ -61,8 +61,8 @@ class UserViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_200_OK)
 
         elif request.method == "PATCH":
-            if ("username" in request.data and
-                    request.data["username"].lower() == "me"):
+            if ("username" in request.data
+                    and request.data["username"].lower() == "me"):
                 return Response(
                     {"detail": "Использовать 'me' "
                                "в качестве username запрещено."},
