@@ -1,46 +1,55 @@
+from django.core.validators import RegexValidator
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
+from reviews.constants import (
+    MAX_NAMES_STRINGS,
+    MAX_EMAIL_STRING,
+    MAX_CONFORMATION_CODE_STRING,
+)
+from users.common import UserService
+from users.mixin import UsernameValidationMixin
 from users.models import User
-from .mixin import UsernameValidationMixin
 
 
 class UserTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=5)
+    username = serializers.CharField(max_length=MAX_NAMES_STRINGS)
+    confirmation_code = serializers.CharField(
+        max_length=MAX_CONFORMATION_CODE_STRING
+    )
 
     def validate(self, data):
-        user = User.objects.get(username=data.get("username"))
-        if user.confirmation_code != data.get("confirmation_code"):
+        username = data.get("username")
+        confirmation_code = data.get("confirmation_code")
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound("Пользователь не найден")
+
+        if user.confirmation_code != confirmation_code:
             raise serializers.ValidationError("Неверный код подтверждения")
+
         return data
 
 
 class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
-    password = serializers.CharField(
-        write_only=True, min_length=8, required=False)
-    email = serializers.EmailField(
-        min_length=6, max_length=254, required=True)
-    # username_validator = RegexValidator(
-    #     r"^[\w.@+-]+\$",
-    #     message="Можно использовать только буквы "
-    #             "(включая буквы в верхнем и нижнем регистрах), "
-    #             "цифры и спецсимволы: ., @, +, - "
-    # )
-    username = serializers.CharField(max_length=150, )
-    first_name = serializers.CharField(
-        min_length=4,
-        max_length=150,
-        required=False,
-    )
-    last_name = serializers.CharField(
-        min_length=4, max_length=150, required=False)
-    bio = serializers.CharField(required=False)
+    email = serializers.EmailField(max_length=MAX_EMAIL_STRING, required=True)
+    username = serializers.CharField(max_length=MAX_NAMES_STRINGS)
 
     def validate_username(self, value):
         if value.lower() == "me":
             raise serializers.ValidationError(
-                "Недопустимое имя для пользователя: me"
+                "Использовать 'me' в качестве username запрещено."
             )
+        username_validator = RegexValidator(
+            r"^[\w.@+_-]+\Z",
+            message=(
+                "Можно использовать только буквы (включая буквы в верхнем и "
+                "нижнем регистрах), цифры и спецсимволы: ., @, +, -"
+            )
+        )
+        username_validator(value)
         return value
 
     def validate(self, data):
@@ -50,16 +59,13 @@ class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
         user_by_email = User.objects.filter(email=email).first()
         user_by_username = User.objects.filter(username=username).first()
 
-        if user_by_email and user_by_email == user_by_username:
-            return data
-
         if user_by_email and user_by_username:
-            raise serializers.ValidationError(
-                {
-                    "email": "Email уже занят.",
-                    "username": "Username уже занят."
-                },
-            )
+            if user_by_email == user_by_username:
+                return data
+            raise serializers.ValidationError({
+                "email": "Email уже занят.",
+                "username": "Username уже занят."
+            })
 
         if user_by_email:
             raise serializers.ValidationError({"email": "Email уже занят."})
@@ -71,35 +77,50 @@ class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
 
         return data
 
+    def create(self, validated_data):
+        email = validated_data["email"]
+        username = validated_data["username"]
+
+        existing_user_email = User.objects.filter(email=email).first()
+        existing_user_username = User.objects.filter(username=username).first()
+
+        confirmation_code = UserService.create_confirmation_code()
+
+        if existing_user_email and existing_user_username:
+            existing_user_email.confirmation_code = confirmation_code
+            existing_user_email.save()
+            UserService.send_confirmation_email(
+                existing_user_email, confirmation_code
+            )
+            return validated_data
+
+        if existing_user_email:
+            raise serializers.ValidationError(
+                "Пользователь с таким email уже существует."
+            )
+
+        if existing_user_username:
+            raise serializers.ValidationError(
+                "Пользователь с таким username уже существует."
+            )
+
+        user = User(**validated_data)
+        user.password = "qwerty"  # TODO: Заменить на генерацию пароля
+        user.confirmation_code = confirmation_code
+        user.full_clean()
+        user.save()
+
+        UserService.send_confirmation_email(user, confirmation_code)
+
+        return validated_data
+
 
 class UserSerializer(serializers.ModelSerializer):
-    # username_validator = RegexValidator(
-    #     r"^[\w.@+-]+\Z",
-    #     message="Можно использовать только буквы "
-    #             "(включая буквы в верхнем и нижнем регистрах), "
-    #             "цифры и спецсимволы: ., @, +, - "
-    # )
-    # username = serializers.CharField(
-    #     min_length=4,
-    #     max_length=150,
-    #     validators=[
-    #         username_validator,
-    #         UniqueValidator(queryset=User.objects.all()),
-    #     ],
-    # )
-
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "username",
-                  "bio", "email", "role")
-
-    def validate_username(self, value):
-        if self.instance and User.objects.filter(
-                username=value).exclude(pk=self.instance.pk).exists():
-            raise serializers.ValidationError(
-                "Пользователь с таким именем уже существует"
-            )
-        return value
+        fields = (
+            "first_name", "last_name", "username", "bio", "email", "role"
+        )
 
     def update(self, instance, validated_data):
         new_role = validated_data.get("role")
