@@ -28,7 +28,7 @@ class BaseModelForCategoryAndGenre(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['name',]
+        ordering = ['name', ]
         verbose_name = 'Базовая модель для категории и жанра'
         verbose_name_plural = 'Базовые модели для категорий и жанров'
 
