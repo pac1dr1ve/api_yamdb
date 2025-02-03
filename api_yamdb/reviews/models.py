@@ -15,7 +15,7 @@ from .constants import (
 User = get_user_model()
 
 
-class BaseModelForCategoryAndGenre(models.Model):
+class NameAndSlugBaseModel(models.Model):
     name = models.CharField(
         max_length=LENGTH_FOR_NAME,
         verbose_name='Категория'
@@ -28,7 +28,7 @@ class BaseModelForCategoryAndGenre(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['name', ]
+        ordering = ('name', )
         verbose_name = 'Базовая модель для категории и жанра'
         verbose_name_plural = 'Базовые модели для категорий и жанров'
 
@@ -36,7 +36,7 @@ class BaseModelForCategoryAndGenre(models.Model):
         return self.name[:CLIPPING_LENGTH]
 
 
-class BaseModelForCommentAndReview(models.Model):
+class TextAndAuthorAndPubDateBaseModel(models.Model):
     text = models.TextField(
         verbose_name='Текст'
     )
@@ -53,15 +53,18 @@ class BaseModelForCommentAndReview(models.Model):
         verbose_name = 'Базовая модель для комментария и отзыва'
         verbose_name_plural = 'Базовые модели для комментарий и отзывов'
 
+    def __str__(self):
+        return self.text[:CLIPPING_LENGTH]
 
-class Category(BaseModelForCategoryAndGenre):
-    class Meta(BaseModelForCategoryAndGenre.Meta):
+
+class Category(NameAndSlugBaseModel):
+    class Meta(NameAndSlugBaseModel.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
-class Genre(BaseModelForCategoryAndGenre):
-    class Meta(BaseModelForCategoryAndGenre.Meta):
+class Genre(NameAndSlugBaseModel):
+    class Meta(NameAndSlugBaseModel.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -71,11 +74,11 @@ class Title(models.Model):
         max_length=LENGTH_FOR_NAME,
         verbose_name='Произведение'
     )
-    year = models.PositiveSmallIntegerField(
+    year = models.PositiveIntegerField(
         verbose_name='Год выпуска',
         validators=[
             MaxValueValidator(
-                limit_value=datetime.now().year,
+                limit_value=lambda: datetime.now().year,
                 message='Год выпуска не может быть больше текущего года!')
         ]
     )
@@ -103,7 +106,7 @@ class Title(models.Model):
         return self.name[:CLIPPING_LENGTH]
 
 
-class Review(BaseModelForCommentAndReview):
+class Review(TextAndAuthorAndPubDateBaseModel):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -124,13 +127,13 @@ class Review(BaseModelForCommentAndReview):
         )
     )
 
-    class Meta(BaseModelForCommentAndReview.Meta):
+    class Meta(TextAndAuthorAndPubDateBaseModel.Meta):
         unique_together = ('author', 'title')
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
 
-class Comment(BaseModelForCommentAndReview):
+class Comment(TextAndAuthorAndPubDateBaseModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
@@ -138,6 +141,6 @@ class Comment(BaseModelForCommentAndReview):
         verbose_name='Отзыв'
     )
 
-    class Meta(BaseModelForCommentAndReview.Meta):
+    class Meta(TextAndAuthorAndPubDateBaseModel.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
