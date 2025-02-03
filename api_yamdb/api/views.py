@@ -14,7 +14,7 @@ from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
-    TitleSerializer,
+    TitleSerializerForReade,
     TitleSerializerForWrite,
     ReviewSerializer
 )
@@ -32,12 +32,12 @@ class CategoryAndGenreViewSet(mixins.CreateModelMixin,
 
 
 class CategoryViewSet(CategoryAndGenreViewSet):
-    queryset = Category.objects.all().order_by('name')
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(CategoryAndGenreViewSet):
-    queryset = Genre.objects.all().order_by('name')
+    queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
@@ -47,18 +47,18 @@ class TitleViewSet(viewsets.ModelViewSet):
         .annotate(rating=Avg('reviews__score'))
         .order_by('name')
     )
-    serializer_class = TitleSerializer
+    serializer_class = TitleSerializerForReade
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete')
-    ordering = ('id',)
+    ordering = ('name', 'year')
     ordering_fields = ('name', 'year')
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
             return TitleSerializerForWrite
-        return TitleSerializer
+        return TitleSerializerForReade
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -68,7 +68,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly,
         IsAdminOrModeratorOrReadOnly,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -87,7 +87,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly,
         IsAdminOrModeratorOrReadOnly,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_review(self):
         return get_object_or_404(
