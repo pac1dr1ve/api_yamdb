@@ -36,6 +36,6 @@ auth_urlpatterns = [
     path('token/', get_token_obtain_pair_view, name='token'),
 ]
 urlpatterns = [
-    path('auth/', include(auth_urlpatterns)),
-    path('', include(v1_router.urls)),
+    path('v1/auth/', include(auth_urlpatterns)),
+    path('v1/', include(v1_router.urls)),
 ]
