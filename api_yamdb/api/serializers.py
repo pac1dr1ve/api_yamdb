@@ -61,11 +61,10 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True)
-    review = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'pub_date', 'review')
+        fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('pub_date',)
 
 
@@ -73,11 +72,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True)
     score = serializers.IntegerField()
-    title = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         fields = ('comments', 'id', 'text', 'author',
-                  'pub_date', 'title', 'score')
+                  'pub_date', 'score')
         model = Review
         read_only_fields = ('pub_date',)
 

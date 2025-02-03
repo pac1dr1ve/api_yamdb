@@ -1,11 +1,16 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from .constants import LENGTH_FOR_NAME, LENGTH_FOR_SLUG, CLIPPING_LENGTH, MIN_VALUE_FOR_SCORE, MAX_VALUE_FOR_SCORE
+from .constants import (
+    LENGTH_FOR_NAME,
+    LENGTH_FOR_SLUG,
+    CLIPPING_LENGTH,
+    MIN_VALUE_FOR_SCORE,
+    MAX_VALUE_FOR_SCORE
+)
 
 User = get_user_model()
 

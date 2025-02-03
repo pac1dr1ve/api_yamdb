@@ -4,13 +4,13 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from rest_framework import serializers
 
 from reviews.constants import (
     MAX_EMAIL_STRING,
     MAX_CONFORMATION_CODE_STRING,
     MAX_NAMES_STRINGS,
 )
+from users.mixin import UsernameValidationMixin
 
 
 class Role(Enum):
@@ -20,16 +20,6 @@ class Role(Enum):
 
     def __str__(self):
         return self.name.capitalize()
-
-
-class UsernameValidationMixin:
-    def validate_username(self, username):
-        if username.lower() == "me":
-            raise serializers.ValidationError(
-                _("Использовать 'me' в качестве username запрещено."),
-                code="invalid_username",
-            )
-        return username
 
 
 class User(AbstractUser, UsernameValidationMixin):

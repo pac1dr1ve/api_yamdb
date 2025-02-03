@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 class UsernameValidationMixin:
     def validate_username(self, username):
-        if username == 'me':
+        if username.lower() == 'me':
             raise serializers.ValidationError(
                 _('Пользователь с таким именем уже существует'),
                 code='invalid_username'
