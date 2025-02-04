@@ -1,3 +1,4 @@
+from django.db import models
 from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -34,40 +35,21 @@ class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
     email = serializers.EmailField(max_length=MAX_EMAIL_STRING, required=True)
     username = serializers.CharField(max_length=MAX_NAMES_STRINGS)
 
-    def validate_username(self, value):
-        if value.lower() == "me":
-            raise serializers.ValidationError(
-                "Использовать 'me' в качестве username запрещено."
-            )
-        username_validator = RegexValidator(
-            r"^[\w.@+_-]+\Z",
-            message=(
-                "Можно использовать только буквы (включая буквы в верхнем и "
-                "нижнем регистрах), цифры и спецсимволы: ., @, +, -"
-            )
-        )
-        username_validator(value)
-        return value
-
     def validate(self, data):
         email = data.get("email")
         username = data.get("username")
 
-        user_by_email = User.objects.filter(email=email).first()
-        user_by_username = User.objects.filter(username=username).first()
+        user_exists = User.objects.filter(
+            models.Q(email=email) | models.Q(username=username))
 
-        if user_by_email and user_by_username:
-            if user_by_email == user_by_username:
+        if user_exists.exists():
+            if user_exists.filter(email=email, username=username).exists():
                 return data
-            raise serializers.ValidationError({
-                "email": "Email уже занят.",
-                "username": "Username уже занят."
-            })
 
-        if user_by_email:
+        if user_exists.filter(email=email).exists():
             raise serializers.ValidationError({"email": "Email уже занят."})
 
-        if user_by_username:
+        if user_exists.filter(username=username).exists():
             raise serializers.ValidationError(
                 {"username": "Username уже занят."}
             )
