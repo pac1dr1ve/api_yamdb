@@ -3,24 +3,18 @@ from rest_framework import (
     permissions,
     status,
     viewsets,
-    serializers,
 )
 from rest_framework.decorators import (
     api_view,
     permission_classes,
     action,
 )
-from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import (
-    InvalidToken,
-    TokenError,
-)
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.permissions import IsAdminUserOrSuperuser
 from users.models import User
-from users.permissions import IsAdminUserOrSuperuser
 from users.serializers import (
     SignUpSerializer,
     UserSerializer,
@@ -80,23 +74,10 @@ class UserViewSet(viewsets.ModelViewSet):
 @permission_classes([permissions.AllowAny])
 def get_token_obtain_pair_view(request):
     serializer = UserTokenSerializer(data=request.data)
-    try:
-        serializer.is_valid(raise_exception=True)
-        user = User.objects.get(username=serializer.validated_data["username"])
-        token = RefreshToken.for_user(user)
-        return Response(
-            {"token": str(token.access_token)},
-            status=status.HTTP_200_OK
-        )
-    except NotFound as e:
-        return Response(
-            {"detail": str(e)},
-            status=status.HTTP_404_NOT_FOUND
-        )
-    except TokenError as e:
-        raise InvalidToken(e.args[0])
-    except serializers.ValidationError as e:
-        return Response(
-            {"detail": str(e)},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    serializer.is_valid(raise_exception=True)
+    user = User.objects.get(
+        username=serializer.validated_data["username"]
+    )
+    token = RefreshToken.for_user(user)
+    return Response({"token": str(token.access_token)},
+                    status=status.HTTP_200_OK)

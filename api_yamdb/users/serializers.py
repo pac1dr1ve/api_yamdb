@@ -1,6 +1,6 @@
 from django.core.validators import RegexValidator
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound
 
 from reviews.constants import (
     MAX_NAMES_STRINGS,
@@ -22,10 +22,7 @@ class UserTokenSerializer(serializers.Serializer):
         username = data.get("username")
         confirmation_code = data.get("confirmation_code")
 
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise NotFound("Пользователь не найден")
+        user = get_object_or_404(User, username=username)
 
         if user.confirmation_code != confirmation_code:
             raise serializers.ValidationError("Неверный код подтверждения")
