@@ -1,7 +1,6 @@
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -37,15 +36,7 @@ class User(AbstractUser, UsernameValidationMixin):
         _("Никнейм"),
         max_length=MAX_NAMES_STRINGS,
         unique=True,
-        validators=[
-            RegexValidator(
-                regex=r"^[\w.@+_-]+\Z",
-                message="Можно использовать только буквы "
-                        "(включая буквы в верхнем и нижнем регистрах), "
-                        "цифры и спецсимволы: ., @, +, - ",
-                code="invalid_username",
-            ),
-        ],
+        validators=[UsernameValidationMixin.username_validator],
     )
     first_name = models.CharField(
         _("Имя"),
@@ -75,10 +66,6 @@ class User(AbstractUser, UsernameValidationMixin):
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
-
-    def clean(self):
-        super().clean()
-        self.validate_username(self.username)
 
     @property
     def is_admin(self):
