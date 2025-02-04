@@ -22,8 +22,8 @@ from users.serializers import (
 )
 
 
-@api_view(["POST"])
-@permission_classes([permissions.AllowAny])
+@api_view(("POST",))
+@permission_classes((permissions.AllowAny,))
 def sign_up_view(request):
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -32,13 +32,13 @@ def sign_up_view(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ("get", "post", "patch", "delete")
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ["username"]
+    search_fields = ("username",)
     lookup_field = "username"
-    permission_classes = [IsAdminUserOrSuperuser]
+    permission_classes = (IsAdminUserOrSuperuser,)
 
     @action(
         detail=False,
@@ -70,14 +70,11 @@ class UserViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
-@permission_classes([permissions.AllowAny])
+@api_view(("POST",))
+@permission_classes((permissions.AllowAny,))
 def get_token_obtain_pair_view(request):
     serializer = UserTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = User.objects.get(
-        username=serializer.validated_data["username"]
-    )
-    token = RefreshToken.for_user(user)
+    token = RefreshToken.for_user(serializer.validated_data["user"])
     return Response({"token": str(token.access_token)},
                     status=status.HTTP_200_OK)
