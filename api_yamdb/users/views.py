@@ -40,6 +40,33 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     permission_classes = (IsAdminUserOrSuperuser,)
 
+#@action(
+#        detail=False,
+#        url_path="me",
+#        permission_classes=[IsAuthenticated]
+#    )
+#    def me(self, request):
+#        pass
+#
+#    @me.mapping.get
+#    def me_get(self, request):
+#        serializer = self.get_serializer(request.user)
+#        return Response(serializer.data, status=status.HTTP_200_OK)
+#
+#    @me.mapping.patch
+#    def me_patch(self, request):
+#        if ("username" in request.data
+#                and request.data["username"].lower() == "me"):
+#            return Response(
+#                {"detail": "Использовать 'me' в качестве username запрещено."},
+#                status=status.HTTP_400_BAD_REQUEST,
+#            )
+#        serializer = self.get_serializer(
+#            request.user, data=request.data, partial=True)
+#        serializer.is_valid(raise_exception=True)
+#        serializer.save()
+#        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(
         detail=False,
         methods=["get", "patch"],
