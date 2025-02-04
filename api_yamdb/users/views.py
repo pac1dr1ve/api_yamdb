@@ -18,7 +18,7 @@ from users.models import User
 from users.serializers import (
     SignUpSerializer,
     UserSerializer,
-    UserTokenSerializer,
+    UserTokenSerializer, UserNoAdminSerializer,
 )
 
 
@@ -40,61 +40,39 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     permission_classes = (IsAdminUserOrSuperuser,)
 
-#@action(
-#        detail=False,
-#        url_path="me",
-#        permission_classes=[IsAuthenticated]
-#    )
-#    def me(self, request):
-#        pass
-#
-#    @me.mapping.get
-#    def me_get(self, request):
-#        serializer = self.get_serializer(request.user)
-#        return Response(serializer.data, status=status.HTTP_200_OK)
-#
-#    @me.mapping.patch
-#    def me_patch(self, request):
-#        if ("username" in request.data
-#                and request.data["username"].lower() == "me"):
-#            return Response(
-#                {"detail": "Использовать 'me' в качестве username запрещено."},
-#                status=status.HTTP_400_BAD_REQUEST,
-#            )
-#        serializer = self.get_serializer(
-#            request.user, data=request.data, partial=True)
-#        serializer.is_valid(raise_exception=True)
-#        serializer.save()
-#        return Response(serializer.data, status=status.HTTP_200_OK)
+    # Для выбора сериализатора в зависимости от роли
+    def get_serializer_class(self):
+        if (self.request.user.is_authenticated
+                and self.request.user.role == "admin"):
+            return UserSerializer
+        return UserNoAdminSerializer
 
     @action(
         detail=False,
-        methods=["get", "patch"],
+        methods=["get"],
         url_path="me",
         permission_classes=[IsAuthenticated]
     )
     def me(self, request):
         user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        if request.method == "GET":
-            serializer = self.get_serializer(user)
-            return Response(serializer.data,
-                            status=status.HTTP_200_OK)
-
-        elif request.method == "PATCH":
-            if ("username" in request.data
-                    and request.data["username"].lower() == "me"):
-                return Response(
-                    {"detail": "Использовать 'me' "
-                               "в качестве username запрещено."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            serializer = self.get_serializer(
-                user, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data,
-                            status=status.HTTP_200_OK)
+    @me.mapping.patch
+    def patch_me(self, request):
+        user = request.user
+        # if ("username" in request.data
+        #         and request.data["username"].lower() == "me"):
+        #     return Response(
+        #         {"detail": "Использовать 'me' "
+        #                    "в качестве username запрещено."},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+        serializer = UserNoAdminSerializer(
+            user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(("POST",))

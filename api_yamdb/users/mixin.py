@@ -6,17 +6,17 @@ from rest_framework import serializers
 class UsernameValidationMixin:
     username_validator = RegexValidator(
         regex=r"^[\w.@+_-]+\Z",
-        message="Можно использовать только буквы "
-                "(включая буквы в верхнем и нижнем регистрах), "
-                "цифры и спецсимволы: ., @, +, - ",
+        message=_("Можно использовать только буквы "
+                  "(включая буквы в верхнем и нижнем регистрах), "
+                  "цифры и спецсимволы: ., @, +, - "),
         code="invalid_username",
     )
 
     def validate_username(self, username):
         self.username_validator(username)
-        if username.lower() == 'me':
+        if username.lower() == "me":
             raise serializers.ValidationError(
-                _('Пользователь с таким именем уже существует'),
+                _("Использовать 'me' в качестве username запрещено."),
                 code='invalid_username'
             )
         return username
