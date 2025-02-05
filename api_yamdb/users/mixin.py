@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
 
-
 class UsernameValidationMixin:
     username_validator = RegexValidator(
         regex=r"^[\w.@+_-]+\Z",
@@ -20,15 +19,6 @@ class UsernameValidationMixin:
         if username.lower() == "me":
             raise ValidationError(
                 _("Использовать 'me' в качестве username запрещено."),
-                code="invalid_username"
+                code="invalid_username",
             )
-
-        username_validator = RegexValidator(
-            r"^[\w.@+_-]+\Z",
-            message=_(
-                "Можно использовать только буквы (включая буквы в верхнем и "
-                "нижнем регистрах), цифры и спецсимволы: ., @, +, -"
-            )
-        )
-        username_validator(username)
         return username
