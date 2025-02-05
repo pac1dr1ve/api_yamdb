@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -57,43 +56,14 @@ class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
         return data
 
     def create(self, validated_data):
-        email = validated_data["email"]
-        username = validated_data["username"]
-
-        existing_user_email = User.objects.filter(email=email).first()
-        existing_user_username = User.objects.filter(username=username).first()
-
-        confirmation_code = UserService.create_confirmation_code()
-
-        if existing_user_email and existing_user_username:
-            existing_user_email.confirmation_code = confirmation_code
-            existing_user_email.save()
-            UserService.send_confirmation_email(
-                existing_user_email, confirmation_code
-            )
-            return validated_data
-
-        if existing_user_email:
-            raise serializers.ValidationError(
-                "Пользователь с таким email уже существует."
-            )
-
-        if existing_user_username:
-            raise serializers.ValidationError(
-                "Пользователь с таким username уже существует."
-            )
-
-        user = User(**validated_data)
-        user.password = "qwerty"  # TODO: Заменить на генерацию пароля
-        user.confirmation_code = confirmation_code
-        user.full_clean()
+        user, create = User.objects.get_or_create(**validated_data)
+        user.confirmation_code = UserService.create_confirmation_code()
         user.save()
-
-        UserService.send_confirmation_email(user, confirmation_code)
-
+        UserService.send_confirmation_email(user, user.confirmation_code)
         return validated_data
 
 
+# нужно настроить UserViewSet для выбора сериализатора в зависимости от роли
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -101,11 +71,9 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name", "last_name", "username", "bio", "email", "role"
         )
 
-    def update(self, instance, validated_data):
-        new_role = validated_data.get("role")
-        if (new_role and new_role != instance.role
-                and self.context["request"].user.role == "admin"):
-            instance.role = new_role
-        if "role" in validated_data:
-            del validated_data["role"]
-        return super().update(instance, validated_data)
+
+class UserNoAdminSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        pass  # Как ни странно, но нужен pass
