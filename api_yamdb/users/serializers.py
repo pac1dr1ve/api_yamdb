@@ -9,7 +9,7 @@ from reviews.constants import (
     MAX_CONFORMATION_CODE_STRING,
 )
 from users.common import UserService
-from users.mixin import validate_username_not_me, validate_username
+from users.mixin import UsernameValidationMixin
 from users.models import User
 
 
@@ -34,14 +34,9 @@ class UserTokenSerializer(serializers.Serializer):
         return data
 
 
-class SignUpSerializer(serializers.Serializer):
+class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
     email = serializers.EmailField(max_length=MAX_EMAIL_STRING, required=True)
     username = serializers.CharField(max_length=MAX_NAMES_STRINGS)
-
-    def validate_username(self, value):
-        validate_username(value)
-        validate_username_not_me(value)
-        return value
 
     def validate(self, data):
         email = data.get("email")

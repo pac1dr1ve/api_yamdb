@@ -1,0 +1,237 @@
+[33mcommit d71bfe609f8dfb9f748f034267ca96c3ff51ae7d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/api-users[m[33m)[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Thu Feb 6 01:20:31 2025 +0300
+
+    еще переделал логику 'me', но есть повторный код
+
+[33mcommit 9f181b74cacc4e53e6a682081f319038705f2bcb[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Wed Feb 5 23:25:38 2025 +0300
+
+    проблема с me решена, но по другому
+
+[33mcommit 8b5e14cd5a4f090046c6565c0315418ad36642d9[m
+Merge: 318d68e 63060f4
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 20:48:03 2025 +0300
+
+    Merge branch 'feature/api-users' into bugfix/title-genre-category-by-sasha
+    добавил изменения, слил ветки
+
+[33mcommit 318d68e6cc05d51c3488c0f6cdb224147446c3f4[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 20:40:04 2025 +0300
+
+    изменил название метода, русифицировал строки.
+
+[33mcommit 9674dd120b6348b98690f1adc2d9e26f9458f52e[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 20:31:03 2025 +0300
+
+    изменил методы
+
+[33mcommit d928112e8b7280ed076c19a508fb1b6c5a742e60[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 20:30:21 2025 +0300
+
+    подправил строки
+
+[33mcommit 63060f45cb5adf35a34c8a44c208c9c367eac247[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Wed Feb 5 20:03:35 2025 +0300
+
+    поправил view/токен
+
+[33mcommit 15d6b1d78509759dbc453b010fa726c569bf52c7[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 19:38:22 2025 +0300
+
+    исправил ошмбку с добавлением пользователя с никнеймом me через админку
+
+[33mcommit 331778493daaa0ac8c29d3f04d37e7fda69c9336[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 17:16:34 2025 +0300
+
+    изменения внесены
+
+[33mcommit 91559ae604ec2bc866111132c9fd802411f09caa[m
+Merge: ce8df9a 96ac280
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 10:33:33 2025 +0300
+
+    слил ветку
+
+[33mcommit ce8df9ac73b2116005171da20702c28b65b7e9be[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Wed Feb 5 10:29:33 2025 +0300
+
+    закоммитил
+
+[33mcommit 96ac2808eb60652e0aa91d863d3f49bdc44ce195[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Wed Feb 5 01:36:57 2025 +0300
+
+    .mapping и остальное по ревью №2 исправлено
+
+[33mcommit 1a97c561c13dbaed64d1a718b336de9d9d9b060c[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Tue Feb 4 21:48:11 2025 +0300
+
+    подкорректировал мелкие недочеты. не закончил работу с .mapping
+
+[33mcommit a6ada2a9de23e07258d1f437652be6966715b264[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Tue Feb 4 15:57:10 2025 +0300
+
+    изменения внесены
+
+[33mcommit dec35ba9d92f127640b52b79b30eebdf4706b1c5[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Tue Feb 4 15:28:54 2025 +0300
+
+    подправил валидацию
+
+[33mcommit 7e4861b6a56c23b99b7990992302391dcf42e274[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Tue Feb 4 15:06:14 2025 +0300
+
+    подкорректировал файл, но не решил проблему с наследованием.
+
+[33mcommit f824f8583bc81dc1c97cc1a86f72f72bc017a028[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Tue Feb 4 15:05:31 2025 +0300
+
+    перенес валидацию в миксин
+
+[33mcommit 99874517e317eed049a0f13fefb6e3010a51eda8[m
+Merge: afb61b8 fe4c89e
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Tue Feb 4 14:16:15 2025 +0300
+
+    слил ветки
+
+[33mcommit fe4c89ec2528a356179f6fc685ca27123f0c961c[m
+Merge: fda216b 8d0b68e
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Tue Feb 4 01:25:24 2025 +0300
+
+    users/permissions в api, views/token редакт, shortcuts=done
+
+[33mcommit fda216bc3b91dd264151083869901442f0c8a6d1[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Mon Feb 3 20:38:14 2025 +0300
+
+    перед ревью 2
+
+[33mcommit afb61b8d5924ac0782b1b56ac93483f5f13b00ab[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 19:37:19 2025 +0300
+
+    добавил статику на время
+
+[33mcommit d4b20774852bd2f7619793df145f0f2f8b466ce9[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 19:35:16 2025 +0300
+
+    подправил модели
+
+[33mcommit 64a27fd61e4fb39b05f2db032f6ba708aabcfba7[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 19:18:39 2025 +0300
+
+    убрал подключение версий из головного юрла
+
+[33mcommit b0077ee8826428e444ad45d010373dba229c7611[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 19:18:01 2025 +0300
+
+    добавил подключение версий вприложении api
+
+[33mcommit 3d974bcd4e836131af6a58e164fa1554e90bb596[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 19:13:32 2025 +0300
+
+    внес изменения в приложении api. подправил поля валидации и сортировку.
+
+[33mcommit f4234714fe06a370a7a7931d51e114100394e925[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 00:40:59 2025 +0300
+
+    pep 8
+
+[33mcommit 9cb8a861aab804ca063797a3f6ff733b20dd8e2c[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 00:37:24 2025 +0300
+
+    вырезал статику
+
+[33mcommit 8d0b68e6fba3f99a9d2685660f20629a281eedd9[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Mon Feb 3 00:19:48 2025 +0300
+
+    изменения внесены
+
+[33mcommit 454a4fd265c4e88cd9e9e3af5b7740aff39635a4[m
+Merge: eb849e6 4a90bd6
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Sun Feb 2 23:07:53 2025 +0300
+
+    внесены изменения
+
+[33mcommit eb849e687a80a51aec4f69a888068e0967f4969e[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Sun Feb 2 23:03:17 2025 +0300
+
+    изменил юрлы
+
+[33mcommit 4a90bd6b28967372d8e623803970efd54affe958[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Sat Feb 1 23:23:40 2025 +0300
+
+    исправлена валидация me в админке
+
+[33mcommit ec9f3845a26a9939a247b297c08a61606410b457[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Sat Feb 1 22:19:32 2025 +0300
+
+    исправления в users=True
+
+[33mcommit f02b62624a1cabbfec66269709e7b24a63378bac[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Sat Feb 1 15:47:12 2025 +0300
+
+    нужно доправить users/views
+
+[33mcommit 23cf762a33587758abd17e269abade4fc589623d[m
+Merge: 7269382 2d976ed
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Sat Feb 1 02:01:36 2025 +0300
+
+    исправлены users/models и users/serializers
+
+[33mcommit 13a95f70f775f28969ef993b6535d5a1e1b0e2ff[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Fri Jan 31 19:29:21 2025 +0300
+
+    подкорректировал миксин
+
+[33mcommit 726938244fd5eb038aad9c8f7e43dd1d0e3db6a3[m
+Author: Антон Куканов <motokyka@yandex.ru>
+Date:   Fri Jan 31 19:02:56 2025 +0300
+
+    обновляю свою ветку
+
+[33mcommit 68c969e81d5507bc671cfbbcbb3d1fccbcf31db5[m
+Merge: 521be70 2d976ed
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Fri Jan 31 18:51:04 2025 +0300
+
+    слил в свою ветку
+
+[33mcommit 521be704498db6056c45481e5d26ea8bae41b0b7[m
+Author: Alexander Boyko <sasha.boyko.dg.19@gmail.com>
+Date:   Thu Jan 30 12:35:19 2025 +0300
+
+    добавил информацию о тех. стеке
+
+[33mcommit d1c1aa4f887c959894ddee

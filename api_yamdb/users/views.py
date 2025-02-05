@@ -40,11 +40,12 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUserOrSuperuser,)
 
     # Для выбора сериализатора в зависимости от роли
-    def get_serializer_class(self):
-        if (self.request.user.is_authenticated
-                and self.request.user.role == "admin"):
-            return UserSerializer
-        return UserNoAdminSerializer
+    # # TODO возможно лишний код
+    # def get_serializer_class(self):
+    #     if (self.request.user.is_authenticated
+    #             and self.request.user.role == "admin"):
+    #         return UserSerializer
+    #     return UserNoAdminSerializer
 
     @action(
         detail=False,
@@ -59,8 +60,19 @@ class UserViewSet(viewsets.ModelViewSet):
     @me.mapping.patch
     def patch_me(self, request):
         user = request.user
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(
+
+
+        # TODO  Разобраться, почему через админку можно создать пользователя с username="me"
+
+        # if ("username" in request.data
+        #         and request.data["username"].lower() == "me"):
+        #     return Response(
+        #         {"detail": "Использовать 'me' "
+        #                    "в качестве username запрещено."},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+        serializer = UserNoAdminSerializer(
+
             user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
