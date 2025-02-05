@@ -49,13 +49,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
         url_path="me",
         permission_classes=[IsAuthenticated]
     )
     def me(self, request):
         user = request.user
-        serializer = UserSerializer(user)
+        serializer = self.get_serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @me.mapping.patch
@@ -68,7 +67,7 @@ class UserViewSet(viewsets.ModelViewSet):
         #                    "в качестве username запрещено."},
         #         status=status.HTTP_400_BAD_REQUEST,
         #     )
-        serializer = UserNoAdminSerializer(
+        serializer = self.get_serializer_class(
             user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
