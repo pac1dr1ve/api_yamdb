@@ -1,9 +1,9 @@
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
 
 from reviews.constants import (
     MAX_EMAIL_STRING,
@@ -22,7 +22,15 @@ class Role(Enum):
         return self.name.capitalize()
 
 
-class User(AbstractUser, UsernameValidationMixin):
+def validate_username(value):
+    if value.lower() == "me":
+        raise ValidationError(
+            _("Использовать 'me' в качестве username запрещено."),
+            code="invalid_username",
+        )
+
+
+class User(AbstractUser):
     email = models.EmailField(
         _("email address"),
         unique=True,
@@ -37,7 +45,8 @@ class User(AbstractUser, UsernameValidationMixin):
         _("Никнейм"),
         max_length=MAX_NAMES_STRINGS,
         unique=True,
-        validators=[UsernameValidationMixin.username_validator],
+        validators=(UsernameValidationMixin.username_validator,
+                    validate_username)
     )
     first_name = models.CharField(
         _("Имя"),
@@ -75,14 +84,3 @@ class User(AbstractUser, UsernameValidationMixin):
     @property
     def is_moderator(self):
         return self.role == Role.MODERATOR.value
-
-    def clean(self):
-        super().clean()
-        if self.username.lower() == "me":
-            raise ValidationError({
-                "username": "Использовать 'me' в качестве username запрещено."
-            })
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
