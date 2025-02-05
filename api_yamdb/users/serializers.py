@@ -1,6 +1,7 @@
 from django.db import models
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.constants import (
     MAX_NAMES_STRINGS,
@@ -26,6 +27,9 @@ class UserTokenSerializer(serializers.Serializer):
 
         if user.confirmation_code != confirmation_code:
             raise serializers.ValidationError("Неверный код подтверждения")
+
+        refresh = RefreshToken.for_user(user)
+        data["token"] = str(refresh.access_token)
 
         return data
 

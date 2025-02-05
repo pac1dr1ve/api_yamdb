@@ -11,7 +11,6 @@ from rest_framework.decorators import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.permissions import IsAdminUserOrSuperuser
 from users.models import User
@@ -73,6 +72,5 @@ class UserViewSet(viewsets.ModelViewSet):
 def get_token_obtain_pair_view(request):
     serializer = UserTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    token = RefreshToken.for_user(serializer.validated_data["user"])
-    return Response({"token": str(token.access_token)},
-                    status=status.HTTP_200_OK)
+    token = serializer.validated_data['token']
+    return Response({"token": token}, status=status.HTTP_200_OK)
