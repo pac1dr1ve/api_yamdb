@@ -33,17 +33,7 @@ def sign_up_view(request):
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ("get", "post", "patch", "delete")
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("username",)
-    lookup_field = "username"
-    permission_classes = (IsAdminUserOrSuperuser,)
-
-#@action(
-#        detail=False,
-#        url_path="me",
-#        permission_classes=[IsAuthenticated]
+    queryset = User.objects.all() 
 #    )
 #    def me(self, request):
 #        pass
