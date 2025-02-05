@@ -1,6 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-from rest_framework import serializers
 
 
 class UsernameValidationMixin:
@@ -15,7 +15,7 @@ class UsernameValidationMixin:
     def validate_username(self, username):
         self.username_validator(username)
         if username.lower() == "me":
-            raise serializers.ValidationError(
+            raise ValidationError(
                 _("Использовать 'me' в качестве username запрещено."),
                 code='invalid_username'
             )
