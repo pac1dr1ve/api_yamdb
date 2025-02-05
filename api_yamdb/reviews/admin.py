@@ -27,8 +27,7 @@ class TitleAdmin(admin.ModelAdmin):
     filter_horizontal = ('genre',)
     empty_value_display = 'Не задано'
 
-    @admin.display(description='Жанры')
-    def genres_genres(self, obj):
+    def genres_list(self, obj):
         return ', '.join(genre for genre in obj.genre.all())
 
 
