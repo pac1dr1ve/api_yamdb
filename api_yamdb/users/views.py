@@ -54,20 +54,14 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         user = request.user
-        serializer = self.get_serializer_class(user)
+        serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @me.mapping.patch
     def patch_me(self, request):
         user = request.user
-        # if ("username" in request.data
-        #         and request.data["username"].lower() == "me"):
-        #     return Response(
-        #         {"detail": "Использовать 'me' "
-        #                    "в качестве username запрещено."},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
-        serializer = self.get_serializer_class(
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(
             user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
