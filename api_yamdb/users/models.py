@@ -1,6 +1,7 @@
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -9,7 +10,7 @@ from reviews.constants import (
     MAX_CONFORMATION_CODE_STRING,
     MAX_NAMES_STRINGS,
 )
-from users.mixin import validate_username, validate_username_not_me
+from users.mixin import UsernameValidationMixin
 
 
 class Role(Enum):
@@ -19,6 +20,14 @@ class Role(Enum):
 
     def __str__(self):
         return self.name.capitalize()
+
+
+def validate_username(value):
+    if value.lower() == "me":
+        raise ValidationError(
+            _("Использовать 'me' в качестве username запрещено."),
+            code="invalid_username",
+        )
 
 
 class User(AbstractUser):
@@ -36,8 +45,8 @@ class User(AbstractUser):
         _("Никнейм"),
         max_length=MAX_NAMES_STRINGS,
         unique=True,
-        validators=(validate_username,
-                    validate_username_not_me)
+        validators=(UsernameValidationMixin.username_validator,
+                    validate_username)
     )
     first_name = models.CharField(
         _("Имя"),
@@ -75,7 +84,3 @@ class User(AbstractUser):
     @property
     def is_moderator(self):
         return self.role == Role.MODERATOR.value
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
