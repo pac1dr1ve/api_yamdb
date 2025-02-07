@@ -2,6 +2,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.constants import MIN_VALUE_FOR_SCORE, MAX_VALUE_FOR_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -16,7 +17,7 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitleSerializerForReade(serializers.ModelSerializer):
+class TitleSerializerForReader(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True, default=None)
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
@@ -50,7 +51,7 @@ class TitleSerializerForWrite(serializers.ModelSerializer):
         return value
 
     def to_representation(self, instance):
-        return super().to_representation(instance)
+        return TitleSerializerForReader(instance).data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -67,10 +68,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True)
     score = serializers.IntegerField(
-        validators=[
-            MinValueValidator(1, message='Оценка должна быть от 1 до 10.'),
-            MaxValueValidator(10, message='Оценка должна быть от 1 до 10.'),
-        ]
+        validators=(
+            MinValueValidator(
+                MIN_VALUE_FOR_SCORE,
+                message=(f'Оценка должна быть от {MIN_VALUE_FOR_SCORE}'
+                         f'до {MAX_VALUE_FOR_SCORE}.')),
+            MaxValueValidator(
+                MAX_VALUE_FOR_SCORE,
+                message=(f'Оценка должна быть от {MIN_VALUE_FOR_SCORE}'
+                         f'до {MAX_VALUE_FOR_SCORE}.')),
+        )
     )
 
     class Meta:
@@ -81,11 +88,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         request = self.context['request']
-        view = self.context.get('view')
         if request.method == 'POST':
-            user = request.user
-            title_id = view.kwargs.get('title_id')
-            if Review.objects.filter(title_id=title_id, author=user).exists():
+            title_id = self.context['view'].kwargs.get('title_id')
+            if Review.objects.filter(title_id=title_id,
+                                     author=request.user).exists():
                 raise serializers.ValidationError(
                     'Пользователь уже оставил отзыв на это произведение.'
                 )
