@@ -2,6 +2,7 @@ import random
 import string
 
 from django.core.mail import send_mail
+from django.conf import settings
 
 from reviews.constants import MAX_CONFORMATION_CODE_STRING
 
@@ -20,7 +21,7 @@ class UserService:
         send_mail(
             "Код подтверждения",
             f"Ваш код подтверждения: {confirmation_code}",
-            "yamdb@example.com",
+            settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
         )
