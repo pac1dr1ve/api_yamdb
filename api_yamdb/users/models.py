@@ -70,7 +70,7 @@ class User(AbstractUser):
     )
 
     class Meta:
-        ordering = ["username", "role"]
+        ordering = ("username", "role",)
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 

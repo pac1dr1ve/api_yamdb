@@ -25,8 +25,14 @@ class UserTokenSerializer(serializers.Serializer):
 
         user = get_object_or_404(User, username=username)
 
-        if user.confirmation_code != confirmation_code:
+        if (
+            not user.confirmation_code
+            or user.confirmation_code != confirmation_code
+        ):
             raise serializers.ValidationError("Неверный код подтверждения")
+
+        user.confirmation_code = ""
+        user.save()
 
         refresh = RefreshToken.for_user(user)
         data["token"] = str(refresh.access_token)
@@ -67,7 +73,6 @@ class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
         return validated_data
 
 
-# нужно настроить UserViewSet для выбора сериализатора в зависимости от роли
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -77,7 +82,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserNoAdminSerializer(UserSerializer):
-    role = serializers.CharField(read_only=True)
-
     class Meta(UserSerializer.Meta):
-        pass  # Как ни странно, но нужен pass
+        read_only_fields = ("role",)
