@@ -43,7 +43,7 @@ class UserViewSet(viewsets.ModelViewSet):
     # Для выбора сериализатора в зависимости от роли
     def get_serializer_class(self):
         if (self.request.user.is_authenticated
-                and self.request.user.role == Role.ADMIN):
+                and self.request.user.role == Role.ADMIN.value):
             return UserSerializer
         return UserNoAdminSerializer
 
