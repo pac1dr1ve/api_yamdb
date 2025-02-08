@@ -69,6 +69,10 @@ class Genre(NameAndSlugAbstractModel):
         verbose_name_plural = 'Жанры'
 
 
+def current_year():
+    return datetime.now().year
+
+
 class Title(models.Model):
     name = models.CharField(
         max_length=LENGTH_FOR_NAME,
@@ -78,7 +82,7 @@ class Title(models.Model):
         verbose_name='Год выпуска',
         validators=(
             MaxValueValidator(
-                limit_value=lambda: datetime.now().year,
+                limit_value=current_year,
                 message='Год выпуска не может быть больше текущего года!'),
         )
     )
