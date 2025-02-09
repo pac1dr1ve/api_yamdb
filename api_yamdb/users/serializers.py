@@ -4,7 +4,11 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.common import UserService
-from users.constants import MAX_NAMES_STRINGS, MAX_CONFORMATION_CODE_STRING, MAX_EMAIL_STRING
+from users.constants import (
+    MAX_NAMES_STRINGS,
+    MAX_CONFORMATION_CODE_STRING,
+    MAX_EMAIL_STRING
+)
 from users.mixin import UsernameValidationMixin
 from users.models import User
 
