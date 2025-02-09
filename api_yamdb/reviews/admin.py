@@ -21,13 +21,14 @@ class GenreAdmin(admin.ModelAdmin):
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'year', 'category', 'genres_list')
+    list_display = ('name', 'year', 'category', 'get_genres')
     list_filter = ('year', 'genre', 'category')
     search_fields = ('name', 'description')
     filter_horizontal = ('genre',)
     empty_value_display = 'Не задано'
 
-    def genres_list(self, obj):
+    @admin.display(description='Жанры')
+    def get_genres(self, obj):
         return ', '.join(genre for genre in obj.genre.all())
 
 

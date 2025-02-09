@@ -3,12 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.constants import (
-    MAX_NAMES_STRINGS,
-    MAX_EMAIL_STRING,
-    MAX_CONFORMATION_CODE_STRING,
-)
 from users.common import UserService
+from users.constants import MAX_NAMES_STRINGS, MAX_CONFORMATION_CODE_STRING, MAX_EMAIL_STRING
 from users.mixin import UsernameValidationMixin
 from users.models import User
 
@@ -25,8 +21,14 @@ class UserTokenSerializer(serializers.Serializer):
 
         user = get_object_or_404(User, username=username)
 
-        if user.confirmation_code != confirmation_code:
+        if (
+                not user.confirmation_code
+                or user.confirmation_code != confirmation_code
+        ):
             raise serializers.ValidationError("Неверный код подтверждения")
+
+        user.confirmation_code = ""
+        user.save()
 
         refresh = RefreshToken.for_user(user)
         data["token"] = str(refresh.access_token)
@@ -67,8 +69,7 @@ class SignUpSerializer(serializers.Serializer, UsernameValidationMixin):
         return validated_data
 
 
-# нужно настроить UserViewSet для выбора сериализатора в зависимости от роли
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer, UsernameValidationMixin):
     class Meta:
         model = User
         fields = (
@@ -77,7 +78,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserNoAdminSerializer(UserSerializer):
-    role = serializers.CharField(read_only=True)
-
     class Meta(UserSerializer.Meta):
-        pass  # Как ни странно, но нужен pass
+        read_only_fields = ("role",)
