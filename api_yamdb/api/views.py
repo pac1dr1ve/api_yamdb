@@ -5,16 +5,14 @@ from rest_framework import viewsets, permissions, mixins, filters
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 
-
 from reviews.models import Category, Genre, Title, Review
-
 from .filters import TitleFilter
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrReadOnly
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
-    TitleSerializerForReade,
+    TitleSerializerForReader,
     TitleSerializerForWrite,
     ReviewSerializer
 )
@@ -47,7 +45,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         .annotate(rating=Avg('reviews__score'))
         .order_by('name')
     )
-    serializer_class = TitleSerializerForReade
+    serializer_class = TitleSerializerForReader
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
@@ -58,7 +56,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
             return TitleSerializerForWrite
-        return TitleSerializerForReade
+        return TitleSerializerForReader
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
