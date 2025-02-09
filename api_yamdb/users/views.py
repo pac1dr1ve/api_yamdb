@@ -12,7 +12,6 @@ from rest_framework.decorators import (
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.permissions import IsAdminUserOrSuperuser
 from users.models import User
 from users.serializers import (
     SignUpSerializer,
@@ -20,6 +19,7 @@ from users.serializers import (
     UserTokenSerializer, UserNoAdminSerializer,
 )
 from .models import Role
+from .permissions import IsAdminUserOrSuperuser
 
 
 @api_view(("POST",))
