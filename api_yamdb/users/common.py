@@ -4,7 +4,7 @@ import string
 from django.conf import settings
 from django.core.mail import send_mail
 
-from users.constants import MAX_CONFORMATION_CODE_STRING
+from reviews.constants import MAX_CONFORMATION_CODE_STRING
 
 
 class UserService:

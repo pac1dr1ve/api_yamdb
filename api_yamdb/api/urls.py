@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from users.views import (
+from api.views import (
     UserViewSet,
     sign_up_view,
     get_token_obtain_pair_view,
